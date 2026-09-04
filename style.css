@@ -1301,3 +1301,25 @@ body.dark .splash { background: linear-gradient(180deg, #14171d, #1b1f26); }
   .stat-card { padding: 12px 8px; min-width: 0; }
   .stat-num { font-size: 24px; }
 }
+
+/* ========== 成就徽章(打卡页徽章墙) ========== */
+.badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+.badge {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 14px 10px 12px; text-align: center;
+  opacity: .45; filter: grayscale(.85); transition: opacity .25s, transform .25s, filter .25s;
+}
+.badge.earned { opacity: 1; filter: none; }
+.badge.earned:hover { transform: translateY(-2px); }
+.badge-emoji { font-size: 26px; line-height: 1.2; }
+.badge.earned .badge-emoji { animation: badge-pop .5s ease; }
+@keyframes badge-pop { 0% { transform: scale(.4); } 70% { transform: scale(1.25); } 100% { transform: scale(1); } }
+.badge-name { font-weight: 700; font-size: 13px; margin-top: 6px; color: var(--text); }
+.badge-desc { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+
+/* 错词本「重练中」进度标签 */
+.book-retrain {
+  font-size: 11px; color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+}

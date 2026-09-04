@@ -37,6 +37,8 @@ let familiar = {};                     // { 单词键: true } 认识但记得不
 let dailyGoal = 0;                     // 每日新词目标(0 = 未设)
 let goalCelebrated = '';               // 已庆祝达成目标的日期(当天只提示一次)
 let reviewLog = {};                    // { 'YYYY-MM-DD': 复习词数 } 统计图数据(从启用日起累计)
+let wrongStreak = {};                  // { 单词键: 连续答对次数 } 错词智能重练:连续答对 2 次自动移出错词本
+let achievements = {};                 // { 成就id: 达成日期 } 成就徽章
 let curIdx = 0;                        // 当前卡片下标
 let filtered = [];                     // 筛选后的单词列表
 let curWord = null;                    // 当前卡片单词
@@ -100,9 +102,12 @@ function loadState() {
     dailyGoal = parseInt(localStorage.getItem(pkey('daily_goal')) || '0', 10) || 0;
     goalCelebrated = localStorage.getItem(pkey('goal_celebrated')) || '';
     reviewLog = JSON.parse(localStorage.getItem(pkey('review_log')) || '{}');
+    wrongStreak = JSON.parse(localStorage.getItem(pkey('wrong_streak')) || '{}');
+    achievements = JSON.parse(localStorage.getItem(pkey('achievements')) || '{}');
   } catch (e) {
     learned = {}; customWords = []; checkinDates = []; quizBest = null; quizWrong = [];
     newWordDates = {}; wordReview = {}; familiar = {}; dailyGoal = 0; goalCelebrated = ''; reviewLog = {};
+    wrongStreak = {}; achievements = {};
   }
 }
 const saveLearned = () => localStorage.setItem(pkey('learned'), JSON.stringify(learned));
@@ -113,6 +118,8 @@ const saveWrong = () => localStorage.setItem(pkey('quiz_wrong'), JSON.stringify(
 const saveWordDates = () => localStorage.setItem(pkey('new_word_dates'), JSON.stringify(newWordDates));
 const saveWordReview = () => localStorage.setItem(pkey('word_review'), JSON.stringify(wordReview));
 const saveFamiliar = () => localStorage.setItem(pkey('familiar'), JSON.stringify(familiar));
+const saveWrongStreak = () => localStorage.setItem(pkey('wrong_streak'), JSON.stringify(wrongStreak));
+const saveAchievements = () => localStorage.setItem(pkey('achievements'), JSON.stringify(achievements));
 
 // ========== 词库包 ==========
 // 每个词库包独立浏览、独立统计、独立复习
@@ -334,6 +341,7 @@ const markKnown = () => {
     saveWordDates(); saveWordReview();
   }
   saveLearned(); saveWrong();
+  checkAchievements(); // 成就:标记认识词数
   goNext(1);
 };
 const markNew = () => {
@@ -377,7 +385,8 @@ function noteWrong(w) {
   } else if (learned[k]) {
     wordReview[k] = { stage: 0, nextDue: dstr(new Date()), wrong: 1 };
   }
-  saveWordReview(); saveWrong();
+  delete wrongStreak[k]; // 又答错了 → 错词重练进度清零
+  saveWordReview(); saveWrong(); saveWrongStreak();
 }
 
 let addMode = 'single'; // 添加单词弹窗模式:single 单个添加 / bulk 批量导入
@@ -581,6 +590,7 @@ function finishQuiz() {
         '<div class="wrong-item fade-item" style="animation-delay:' + (i * 50) + 'ms"><button class="speak-btn small" data-speak="' + esc(w.ru) + '">🔊</button><span class="wrong-ru">' + esc(w.ru) + '</span><span class="wrong-zh">' + esc(w.zh) + '</span></div>').join('')
     : '<p class="no-wrong">全部答对,没有错题! 👏</p>';
   updateHero();
+  checkAchievements(); // 成就:测验最高分
 }
 
 // ========== 拼写练习(看义拼写 / 听音拼写双模式) ==========
@@ -837,7 +847,9 @@ function renderDueView() {
     const r = reviewStateOf(reviewWord);
     $('#review-ru').textContent = reviewWord.ru;
     $('#review-zh').textContent = reviewWord.zh;
-    $('#review-cat').textContent = reviewWord.cat + (reviewWord.level ? ' · ' + reviewWord.level : '') + (r ? ' · 第' + (r.stage + 1) + ' 轮复习' : '');
+    const kk = wkey(reviewWord);
+    $('#review-cat').textContent = reviewWord.cat + (reviewWord.level ? ' · ' + reviewWord.level : '') + (r ? ' · 第' + (r.stage + 1) + ' 轮复习' : '')
+      + (quizWrong.includes(kk) || (r && r.wrong > 0) ? ' · 🔁 错词重练 ' + (wrongStreak[kk] || 0) + '/2' : '');
     $('#review-note').hidden = !reviewWord.note;
     $('#review-note').textContent = reviewWord.note || '';
     const exs = examplesOf(reviewWord);
@@ -869,6 +881,22 @@ const reviewKnown = () => {
   wordReview[k] = r;
   saveWordReview();
   logReview(); // 统计图:每日复习数 +1
+  // 错词智能重练:错词本里的词连续答对 2 次,自动移出错词本
+  if (quizWrong.includes(k) || (r.wrong || 0) > 0) {
+    const s = (wrongStreak[k] || 0) + 1;
+    if (s >= 2) {
+      r.wrong = 0;
+      quizWrong = quizWrong.filter((x) => x !== k);
+      delete wrongStreak[k];
+      saveWrong(); saveWordReview(); saveWrongStreak();
+      toast('连续答对 2 次,「' + reviewWord.ru + '」已移出错词本! 🎉');
+    } else {
+      wrongStreak[k] = s;
+      saveWrongStreak();
+      toast('记住了!错词重练 ' + s + '/2,再连续答对 1 次即移出错词本');
+    }
+  }
+  checkAchievements(); // 成就:完成全部复习轮的词数
   const was = reviewIdx;
   renderReviewAll();
   reviewIdx = Math.min(was, dueQueue.length - 1);
@@ -881,6 +909,7 @@ const reviewStillNew = () => {
   r.stage = 0;                                    // 忘了 → 重置回第 1 轮
   r.wrong = (r.wrong || 0) + 1;                    // 并记入错词本
   r.nextDue = addDays(INTERVALS[0]);
+  delete wrongStreak[k]; saveWrongStreak();        // 又答错 → 重练进度清零
   wordReview[k] = r;
   saveWordReview();
   logReview(); // 统计图:每日复习数 +1
@@ -917,10 +946,12 @@ function renderWrongbook() {
   $('#wrongbook-list').innerHTML = list.length
     ? list.map((w, i) => {
         const r = reviewStateOf(w);
+        const ws = wrongStreak[wkey(w)] || 0;
         return '<div class="book-item fade-item" style="animation-delay:' + (i * 30) + 'ms">' +
           '<button class="speak-btn small" data-speak="' + esc(w.ru) + '">🔊</button>' +
           '<span class="book-ru">' + esc(w.ru) + '</span><span class="book-zh">' + esc(w.zh) + '</span>' +
           '<span class="book-meta">错 ' + r.wrong + ' 次</span>' +
+          (ws ? '<span class="book-retrain" title="复习时连续答对 2 次即自动移出错词本">重练中 ' + ws + '/2</span>' : '') +
           '<button class="btn btn-light btn-sm wrong-fix-btn" data-fix="' + esc(w.ru) + '">已纠正</button></div>';
       }).join('')
     : '<p class="no-wrong">太棒了,还没有错词! 🎉</p>';
@@ -1036,6 +1067,51 @@ function calcStreak(dates) {
   return streak;
 }
 
+// ========== 成就徽章(打卡页徽章墙 + 任意页解锁提醒) ==========
+const ACHIEVEMENTS = [
+  { id: 'first', emoji: '🌱', name: '初来乍到', desc: '标记第一个单词「认识」', cond: () => Object.keys(learned).length >= 1 },
+  { id: 'w50', emoji: '📗', name: '词汇新手', desc: '认识 50 个单词', cond: () => Object.keys(learned).length >= 50 },
+  { id: 'w100', emoji: '📘', name: '词汇学徒', desc: '认识 100 个单词', cond: () => Object.keys(learned).length >= 100 },
+  { id: 'w500', emoji: '📙', name: '词汇达人', desc: '认识 500 个单词', cond: () => Object.keys(learned).length >= 500 },
+  { id: 'w1000', emoji: '📚', name: '词汇大师', desc: '认识 1000 个单词', cond: () => Object.keys(learned).length >= 1000 },
+  { id: 'm100', emoji: '🎓', name: '百词精通', desc: '100 个单词完成全部 6 轮复习', cond: () => Object.keys(learned).filter((k) => wordReview[k] && wordReview[k].stage >= INTERVALS.length).length >= 100 },
+  { id: 's7', emoji: '🔥', name: '坚持一周', desc: '连续打卡 7 天', cond: () => calcStreak(checkinDates) >= 7 },
+  { id: 's30', emoji: '☀️', name: '坚持一月', desc: '连续打卡 30 天', cond: () => calcStreak(checkinDates) >= 30 },
+  { id: 'q8', emoji: '💪', name: '测验高手', desc: '小测验最高分达到 8 分', cond: () => quizBest != null && quizBest >= 8 },
+  { id: 'q10', emoji: '🏆', name: '测验满分', desc: '小测验答对全部 10 题', cond: () => quizBest != null && quizBest >= 10 },
+  { id: 'g1', emoji: '🎯', name: '目标达成', desc: '完成一次每日学习目标', cond: () => !!goalCelebrated },
+];
+// 检查并解锁新成就(状态写入 + toast 提醒;徽章墙渲染见 renderAchievements)
+function checkAchievements() {
+  const newGot = [];
+  ACHIEVEMENTS.forEach((a) => {
+    if (achievements[a.id] || !a.cond()) return;
+    achievements[a.id] = dstr(new Date());
+    newGot.push(a);
+  });
+  if (!newGot.length) return;
+  saveAchievements();
+  toast(newGot.length === 1
+    ? '🎉 解锁成就:' + newGot[0].emoji + ' ' + newGot[0].name
+    : '🎉 一次解锁 ' + newGot.length + ' 个成就:' + newGot.map((a) => a.emoji).join(''));
+  if (PAGE === 'checkin') renderAchievements();
+}
+// 徽章墙(打卡页):已达成彩色高亮,未达成灰色锁定
+function renderAchievements() {
+  const el = $('#achievement-grid');
+  if (!el) return;
+  const earned = ACHIEVEMENTS.filter((a) => achievements[a.id]).length;
+  $('#achievement-count').textContent = earned + ' / ' + ACHIEVEMENTS.length;
+  el.innerHTML = ACHIEVEMENTS.map((a, i) => {
+    const got = achievements[a.id];
+    return '<div class="badge' + (got ? ' earned' : '') + ' fade-item" style="animation-delay:' + (i * 40) + 'ms" title="' +
+      esc(a.desc) + (got ? '(达成于 ' + got + ')' : '(未达成)') + '">' +
+      '<div class="badge-emoji">' + a.emoji + '</div>' +
+      '<div class="badge-name">' + a.name + '</div>' +
+      '<div class="badge-desc">' + esc(a.desc) + '</div></div>';
+  }).join('');
+}
+
 function renderCheckin() {
   $('#streak-days').textContent = calcStreak(checkinDates);
   $('#checkin-total').textContent = checkinDates.length;
@@ -1061,6 +1137,7 @@ function renderCheckin() {
   }
   $('#calendar').innerHTML = html;
   renderStats(); // 学习统计趋势图
+  renderAchievements(); // 成就徽章墙
   updateHero();
 }
 
@@ -1205,6 +1282,7 @@ function updateGoalUI() {
     goalCelebrated = dstr(new Date());
     localStorage.setItem(pkey('goal_celebrated'), goalCelebrated);
     toast('🎉 今日目标达成!已学 ' + n + ' 个新词,超额完成 ' + (n - dailyGoal) + ' 个!');
+    checkAchievements(); // 成就:目标达成
   }
 }
 function openGoalModal() {
@@ -1320,6 +1398,7 @@ function initAll(newLang, quiet) {
   } else if (PAGE === 'checkin') {
     renderCheckin();
   }
+  checkAchievements(); // 启动/切语言时兜底检查(如导入数据后)
   if (!quiet) toast('已切换到 ' + lang.name + ' ' + lang.flag);
 }
 
@@ -1420,7 +1499,8 @@ document.addEventListener('click', (e) => {
       const k = wkey(w);
       if (wordReview[k]) wordReview[k].wrong = 0;
       quizWrong = quizWrong.filter((x) => x !== k);
-      saveWordReview(); saveWrong();
+      delete wrongStreak[k];
+      saveWordReview(); saveWrong(); saveWrongStreak();
       renderReviewAll();
       toast('已纠正「' + w.ru + '」');
     }
@@ -1469,7 +1549,7 @@ on('#rate-slow', 'click', () => { speakRate = 0.7; toggleRate(); });
 on('#phrase-search', 'input', renderPhrases);
 on('#checkin-btn', 'click', () => {
   const ds = dstr(new Date());
-  if (!checkinDates.includes(ds)) { checkinDates.push(ds); saveCheckin(); renderCheckin(); toast('打卡成功!今天也努力了 💪'); }
+  if (!checkinDates.includes(ds)) { checkinDates.push(ds); saveCheckin(); renderCheckin(); toast('打卡成功!今天也努力了 💪'); checkAchievements(); } // 成就:连续打卡
 });
 
 // ===== 新功能事件绑定:查词 / 每日目标 / 导出导入 =====
