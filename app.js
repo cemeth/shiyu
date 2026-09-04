@@ -1,4 +1,4 @@
-// 拾语 - 主逻辑
+// 言灯 - 主逻辑
 // 支持语言注册表切换:切换语言时按需加载对应的数据包
 
 'use strict';
@@ -1726,7 +1726,7 @@ function exportData() {
   const keys = Object.keys(localStorage).filter((k) =>
     k.startsWith(lang.code + '_') || ['lang_code', 'site_theme', 'site_accent'].includes(k));
   keys.forEach((k) => { out[k] = localStorage.getItem(k); });
-  const blob = new Blob([JSON.stringify({ app: '拾语', exportedAt: new Date().toISOString(), data: out }, null, 2)], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify({ app: '言灯', exportedAt: new Date().toISOString(), data: out }, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = '学习数据备份-' + lang.code + '-' + dstr(new Date()) + '.json';

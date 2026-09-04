@@ -1,4 +1,4 @@
-// 拾语 · 单文件版打包脚本
+// 言灯 · 单文件版打包脚本
 const fs = require('fs');
 const P = __dirname + '/';
 const enc = 'utf8';
@@ -136,7 +136,7 @@ const runtime = `
 
 // 8. 组装输出
 const html = `<!DOCTYPE html>
-<!-- 拾语 · 单文件版:所有页面/样式/词库/例句已内联,双击即可使用 -->
+<!-- 言灯 · 单文件版:所有页面/样式/词库/例句已内联,双击即可使用 -->
 ${head.replace('</head>', '')}
 </head>
 <body data-page="home">
@@ -170,6 +170,6 @@ ${runtime}
 </html>
 `;
 
-const out = P + '拾语.html';
+const out = P + '言灯.html';
 fs.writeFileSync(out, html, enc);
 console.log('OK: ' + out + ' (' + (html.length / 1024).toFixed(0) + ' KB)');
