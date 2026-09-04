@@ -1130,13 +1130,61 @@ function renderAchievements() {
 }
 
 function renderCheckin() {
-  $('#streak-days').textContent = calcStreak(checkinDates);
+  const streak = calcStreak(checkinDates);
+  animateNum($('#streak-days'), streak, 600);
   $('#checkin-total').textContent = checkinDates.length;
   const today = new Date();
   const todayStr = dstr(today);
   const done = checkinDates.includes(todayStr);
-  $('#checkin-btn').disabled = done;
-  $('#checkin-msg').textContent = done ? '今天已经打过卡啦,明天继续! 🔥' : '今天还没打卡,坚持就是胜利!';
+  const btn = $('#checkin-btn');
+  btn.disabled = done;
+  btn.classList.toggle('checked', done);
+  btn.classList.toggle('pulse', !done && streak >= 3);
+  btn.textContent = done ? '今日已打卡 ✓' : '今日打卡';
+  // 激励文案
+  const msgs = [
+    [0, '开始你的第一天,迈出第一步!'],
+    [1, '第一天完成!继续保持!'],
+    [2, '两天了,习惯在形成中…'],
+    [3, '三日打勾,初具恒心!'],
+    [4, '一周只剩 3 天,加油!'],
+    [5, '坚持 5 天,你很可靠。'],
+    [6, '距离一周还差 1 天!'],
+    [7, '连续一周!你就是最棒的!'],
+    [14, '两周达成!了不起的坚持。'],
+    [30, '一月坚持!你已超越多数人。'],
+    [100, '一百天!你是真正的学习者。'],
+  ];
+  let msg = msgs[0][1];
+  for (const [n, m] of msgs) { if (streak >= n) msg = m; }
+  $('#checkin-msg').textContent = done ? '今天已经打过卡啦,明天继续! 🔥' : msg;
+  // 里程碑高亮
+  document.querySelectorAll('.milestone').forEach((el) => {
+    el.classList.toggle('reached', streak >= parseInt(el.dataset.target));
+  });
+  // 月度进度环
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  const daysInMonth = monthEnd.getDate();
+  const dayOfMonth = today.getDate();
+  const monthLearned = checkinDates.filter((d) => {
+    const parts = d.split('-');
+    return parseInt(parts[0]) === today.getFullYear() && parseInt(parts[1]) === (today.getMonth() + 1);
+  }).length;
+  const pct = Math.min(monthLearned / Math.max(dayOfMonth, 1), 1);
+  const circumference = 2 * Math.PI * 52;
+  const offset = circumference * (1 - pct);
+  $('#ring-fill').setAttribute('stroke-dashoffset', circumference - offset);
+  animateNum($('#ring-num'), monthLearned, 500);
+  // 本月新学/已掌握/待复习
+  const masteredCount = Object.keys(learned).filter((k) => wordReview[k] && wordReview[k].stage >= INTERVALS.length).length;
+  const dueCount = Object.keys(wordReview).filter((k) => {
+    const r = wordReview[k];
+    return r && r.nextDue && r.nextDue <= todayStr;
+  }).length;
+  $('#month-new').textContent = monthLearned;
+  $('#month-mastered').textContent = masteredCount;
+  $('#month-due').textContent = dueCount;
   // 日历:最近 8 周,从周一开始
   const set = new Set(checkinDates);
   const start = new Date(today);

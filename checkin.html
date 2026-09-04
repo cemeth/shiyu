@@ -71,13 +71,45 @@
   <!-- 打卡 -->
   <section class="tab-panel active reveal">
     <div class="panel-head"><h2>学习打卡</h2></div>
+
+    <!-- 主 HERO: 火焰 + 数字 + 按钮 -->
     <div class="checkin-hero">
+      <div class="hero-fire">
+        <svg class="fire-svg" viewBox="0 0 64 64" width="48" height="48" aria-hidden="true">
+          <path class="flame-1" d="M32 4 C28 14 20 20 20 30 C20 36 25 42 32 42 C39 42 44 36 44 30 C44 20 36 14 32 4 Z" fill="var(--flame-core)"/>
+          <path class="flame-2" d="M32 16 C30 24 26 28 26 34 C26 38 29 42 32 42 C35 42 38 38 38 34 C38 28 34 24 32 16 Z" fill="var(--flame-mid)"/>
+          <path class="flame-3" d="M32 26 C31 30 29 33 29 36 C29 39 30 41 32 41 C34 41 35 39 35 36 C35 33 33 30 32 26 Z" fill="var(--flame-tip)"/>
+        </svg>
+      </div>
       <div class="streak-num" id="streak-days">0</div>
       <div class="streak-label">连续学习天数</div>
-      <button class="btn btn-primary btn-lg" id="checkin-btn">今日打卡 ✓</button>
+      <div class="streak-milestones" id="streak-milestones">
+        <span class="milestone" data-target="3">3天</span>
+        <span class="milestone" data-target="7">7天</span>
+        <span class="milestone" data-target="30">30天</span>
+        <span class="milestone" data-target="100">100天</span>
+      </div>
+      <button class="btn btn-primary btn-lg checkin-btn" id="checkin-btn">今日打卡</button>
       <p class="checkin-msg" id="checkin-msg"></p>
     </div>
-    <h3 style="text-align:center;">最近 8 周</h3>
+
+    <!-- 月度进度环 -->
+    <div class="month-ring-wrap">
+      <svg class="month-ring" viewBox="0 0 120 120" width="120" height="120">
+        <circle class="ring-bg" cx="60" cy="60" r="52" fill="none" stroke="var(--border)" stroke-width="8"/>
+        <circle class="ring-fill" id="ring-fill" cx="60" cy="60" r="52" fill="none" stroke="var(--primary)" stroke-width="8" stroke-linecap="round"
+          stroke-dasharray="326.73" stroke-dashoffset="326.73" transform="rotate(-90 60 60)"/>
+        <text class="ring-text" x="60" y="55" text-anchor="middle" font-size="22" font-weight="700" fill="var(--text)" font-family="var(--font-mono)" id="ring-num">0</text>
+        <text class="ring-sub" x="60" y="74" text-anchor="middle" font-size="9" fill="var(--text-muted)" font-family="var(--font-mono)" id="ring-sub">/ 本月已学</text>
+      </svg>
+      <div class="month-ring-info">
+        <div class="ring-stat"><span class="label">本月新学</span><b id="month-new">0</b></div>
+        <div class="ring-stat"><span class="label">已掌握</span><b id="month-mastered">0</b></div>
+        <div class="ring-stat"><span class="label">待复习</span><b id="month-due">0</b></div>
+      </div>
+    </div>
+
+    <h3 class="cal-section-title">最近 8 周</h3>
     <div class="calendar" id="calendar"></div>
     <p class="total-days">累计打卡 <b id="checkin-total">0</b> 天</p>
   </section>

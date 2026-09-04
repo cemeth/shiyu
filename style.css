@@ -31,6 +31,10 @@
   --tip-text: #7a5c1e;
   --chart-new: #1a56db;
   --chart-review: #15803d;
+  --success: #15803d;
+  --flame-core: #f59e0b;
+  --flame-mid: #ef4444;
+  --flame-tip: #fbbf24;
   --radius: 10px;
   --radius-sm: 6px;
   --font-sans: 'SF Pro Display', 'Geist Sans', 'Helvetica Neue', 'Inter', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
@@ -66,6 +70,10 @@ body.dark {
   --tip-text: #d4a840;
   --chart-new: #a09078;
   --chart-review: #7aaa8a;
+  --success: #7aaa8a;
+  --flame-core: #d97706;
+  --flame-mid: #dc2626;
+  --flame-tip: #f59e0b;
 }
 
 html { scroll-behavior: smooth; }
@@ -775,16 +783,154 @@ p { color: var(--text-secondary); font-size: clamp(1.0625rem, 1.5vw, 1.125rem); 
 
 /* ========== 打卡 ========== */
 .checkin-hero {
-  text-align: center; border: 1px solid var(--border);
-  border-radius: var(--radius); background: var(--card);
-  padding: 28px 20px; margin-bottom: 22px;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--card) 0%, color-mix(in srgb, var(--primary) 8%, var(--card)) 100%);
+  padding: 36px 20px 28px;
+  margin-bottom: 22px;
+  position: relative;
+  overflow: hidden;
+}
+.checkin-hero::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--accent) 6%, transparent) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-fire {
+  margin: 0 auto 12px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fire-svg { display: block; }
+.fire-svg .flame-1 { animation: flicker 1.2s ease-in-out infinite alternate; }
+.fire-svg .flame-2 { animation: flicker 1.2s ease-in-out infinite alternate-reverse; }
+.fire-svg .flame-3 { animation: flicker 0.9s ease-in-out infinite alternate; }
+@keyframes flicker {
+  0% { opacity: 0.85; transform: scale(1) translateY(0); }
+  50% { opacity: 1; transform: scale(1.04) translateY(-1px); }
+  100% { opacity: 0.9; transform: scale(0.97) translateY(1px); }
 }
 .streak-num {
-  font-size: 3.8rem; font-weight: 700; line-height: 1;
+  font-size: 4rem;
+  font-weight: 800;
+  line-height: 1;
   color: var(--text);
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 24px color-mix(in srgb, var(--primary) 30%, transparent);
 }
-.streak-label { color: var(--text-muted); margin-bottom: 12px; font-size: 12px; font-family: var(--font-mono); letter-spacing: .3px; }
-.checkin-msg { margin-top: 10px; color: var(--text-muted); font-size: 13px; }
+.streak-label {
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.streak-milestones {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.milestone {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  transition: all 0.3s ease;
+}
+.milestone.reached {
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  border-color: var(--primary);
+  color: var(--primary);
+  font-weight: 600;
+}
+.checkin-btn {
+  position: relative;
+  overflow: hidden;
+  padding: 14px 40px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.checkin-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.5s ease;
+}
+.checkin-btn:hover::after { left: 100%; }
+.checkin-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.checkin-btn:active { transform: translateY(0) scale(0.97); }
+.checkin-btn.checked {
+  background: color-mix(in srgb, var(--success) 15%, var(--card));
+  color: var(--success);
+  border: 1px solid var(--success);
+  cursor: default;
+}
+.checkin-btn.checked::after { display: none; }
+.checkin-btn.pulse { animation: btnPulse 2s ease-in-out infinite; }
+@keyframes btnPulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 30%, transparent); }
+  50% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--primary) 0%, transparent); }
+}
+.checkin-msg {
+  margin-top: 14px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-style: italic;
+  min-height: 20px;
+}
+.month-ring-wrap {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 22px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+@media (max-width: 640px) {
+  .month-ring-wrap { flex-direction: column; align-items: flex-start; }
+}
+.month-ring { flex-shrink: 0; }
+.ring-fill { transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+.ring-stat { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 8px; font-size: 13px; }
+.ring-stat:last-child { margin-bottom: 0; }
+.ring-stat .label { color: var(--text-muted); }
+.ring-stat b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.cal-section-title {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  letter-spacing: 0.3px;
+  margin-bottom: 12px;
+}
 .calendar {
   display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;
   max-width: 420px; margin: 10px auto 6px;
@@ -793,19 +939,22 @@ p { color: var(--text-secondary); font-size: clamp(1.0625rem, 1.5vw, 1.125rem); 
 .cal-cell {
   aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
   border: 1px solid var(--border); border-radius: var(--radius-sm);
-  font-size: 12px; color: var(--text-muted); transition: all .12s; font-weight: 400;
+  font-size: 12px; color: var(--text-muted); transition: all .15s ease; font-weight: 400;
+  cursor: default; position: relative;
 }
-.cal-cell:hover { border-color: var(--border-active); transform: scale(1.06); }
-.cal-cell.checked {
-  background: var(--primary); border-color: var(--primary); color: #fff;
-  animation: calPop .25s cubic-bezier(.22,.9,.36,1) both;
-}
-@keyframes calPop { from { transform: scale(.8); } to { transform: scale(1); } }
 .cal-cell.today {
   border-color: var(--accent); border-width: 1.5px;
   font-weight: 600; color: var(--text);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 .cal-cell.future { opacity: .25; }
+.cal-cell.checked {
+  background: linear-gradient(135deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 80%, var(--accent)) 100%);
+  border-color: transparent; color: #fff; font-weight: 600;
+  animation: calPop .25s cubic-bezier(.22,.9,.36,1) both;
+}
+.cal-cell.checked:hover { transform: scale(1.1); }
+@keyframes calPop { from { transform: scale(.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .total-days { text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 8px; font-family: var(--font-mono); }
 .total-days b { color: var(--primary); font-weight: 600; }
 
