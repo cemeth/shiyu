@@ -62,12 +62,13 @@ function toast(msg) {
 }
 
 // ========== 语音朗读 ==========
-function speak(text, rate) {
+function speak(text, rate, onend) {
   if (!('speechSynthesis' in window)) { toast('当前浏览器不支持语音朗读'); return; }
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text.replace(/́/g, '')); // 去掉重音符号再朗读
   u.lang = lang ? lang.speak : 'ru-RU';
   u.rate = rate || speakRate;
+  if (onend) u.onend = onend; // 磨耳朵:播完自动接下一个
   const v = window.speechSynthesis.getVoices().find((x) => x.lang === u.lang);
   if (v) u.voice = v;
   window.speechSynthesis.speak(u);
@@ -256,6 +257,7 @@ function updateStats() {
   updateHero();
   updateQuizInfo();
   updateSpellInfo();
+  updateStressInfo();
   renderWordGrid();
 }
 
@@ -581,8 +583,18 @@ function finishQuiz() {
   updateHero();
 }
 
-// ========== 拼写练习 ==========
+// ========== 拼写练习(看义拼写 / 听音拼写双模式) ==========
 let spell = null; // {words, idx, score, wrong}
+let spellMode = 'see'; // 'see' 看义拼写 / 'listen' 听音拼写
+
+function setSpellMode(m) {
+  spellMode = m;
+  $('#spell-mode-see').classList.toggle('active', m === 'see');
+  $('#spell-mode-listen').classList.toggle('active', m === 'listen');
+  updateSpellInfo();
+}
+on('#spell-mode-see', 'click', () => setSpellMode('see'));
+on('#spell-mode-listen', 'click', () => setSpellMode('listen'));
 
 function resetSpellUI() {
   spell = null;
@@ -606,7 +618,14 @@ function showSpellQuestion() {
   const w = spell.words[spell.idx];
   $('#spell-qnum').textContent = '第 ' + (spell.idx + 1) + ' 题 / 共 ' + spell.words.length + ' 题';
   $('#spell-progress').textContent = (spell.idx + 1) + ' / ' + spell.words.length;
-  $('#spell-zh').textContent = w.zh;
+  if (spellMode === 'listen') {
+    $('#spell-zh').textContent = '🎧 听发音,拼出你听到的单词';
+    $('#spell-hint').textContent = '提示:重音符号 ́ 不用打;没听清点左上角 🔊 再听一遍';
+    speak(w.ru); // 自动播放发音
+  } else {
+    $('#spell-zh').textContent = w.zh;
+    $('#spell-hint').textContent = '提示:重音符号 ́ 不用打,例如 привет 也算对';
+  }
   $('#spell-input').value = '';
   $('#spell-input').disabled = false;
   $('#spell-submit').disabled = false;
@@ -658,6 +677,106 @@ function finishSpell() {
         '<div class="wrong-item fade-item" style="animation-delay:' + (i * 50) + 'ms"><button class="speak-btn small" data-speak="' + esc(w.ru) + '">🔊</button><span class="wrong-ru">' + esc(w.ru) + '</span><span class="wrong-zh">' + esc(w.zh) + '</span></div>').join('')
     : '<p class="no-wrong">全部拼对,没有错词! 👏</p>';
 }
+
+// ========== 重音练习(俄语专属:听音选重音位置,2026-09-04) ==========
+const STRESS_VOWELS = 'аеёиоуыэюя';
+const CN_ORD = '一二三四五六七八九';
+let stressGame = null; // {words, idx, score, wrong}
+// 重音在第几个音节(无 ́ 标记返回 0);音节数 = 元音数
+const stressSyllable = (s) => {
+  let count = 0;
+  for (let i = 0; i < s.length; i++) {
+    if (STRESS_VOWELS.includes(s[i].toLowerCase())) {
+      count++;
+      if (s[i + 1] === '́') return count;
+    }
+  }
+  return 0;
+};
+const syllableCount = (s) => (norm(s).match(new RegExp('[' + STRESS_VOWELS + ']', 'gi')) || []).length;
+
+function updateStressInfo() {
+  if (!$('#stress-begin')) return;
+  const pool = learnedPool().filter((w) => stressSyllable(w.ru) > 0);
+  const n = pool.length;
+  $('#stress-info').innerHTML = n >= 3
+    ? '从你学习过的 <b>' + n + '</b> 个带重音的单词中抽 10 个练重音。'
+    : '先把至少 <b>3</b> 个带重音的单词标记为「认识」,再来练重音吧。';
+  $('#stress-begin').disabled = n < 3;
+}
+function startStress() {
+  const pool = learnedPool().filter((w) => stressSyllable(w.ru) > 0);
+  if (pool.length < 3) { toast('学习过的带重音单词太少,先把单词标记为「认识」吧'); return; }
+  shuffle(pool);
+  stressGame = { words: pool.slice(0, 10), idx: 0, score: 0, wrong: [] };
+  $('#stress-start').hidden = true;
+  $('#stress-result').hidden = true;
+  $('#stress-run').hidden = false;
+  showStressQuestion();
+}
+function showStressQuestion() {
+  const w = stressGame.words[stressGame.idx];
+  const syl = stressSyllable(w.ru);
+  const total = syllableCount(w.ru);
+  $('#stress-qnum').textContent = '第 ' + (stressGame.idx + 1) + ' 题 / 共 ' + stressGame.words.length + ' 题';
+  $('#stress-progress').textContent = (stressGame.idx + 1) + ' / ' + stressGame.words.length;
+  $('#stress-word').textContent = norm(w.ru); // 不带重音显示
+  $('#stress-speak').dataset.speak = w.ru;
+  $('#stress-feedback').innerHTML = '';
+  $('#stress-feedback').className = 'spell-feedback';
+  $('#stress-next').hidden = true;
+  const opts = $('#stress-options');
+  opts.innerHTML = '';
+  for (let i = 1; i <= total; i++) {
+    const b = document.createElement('button');
+    b.className = 'stress-opt';
+    b.textContent = '第 ' + CN_ORD[i - 1] + ' 音节';
+    b.addEventListener('click', () => answerStress(i));
+    opts.appendChild(b);
+  }
+  speak(w.ru); // 自动播放发音
+}
+function answerStress(n) {
+  if (!stressGame) return;
+  const w = stressGame.words[stressGame.idx];
+  const right = stressSyllable(w.ru);
+  const fb = $('#stress-feedback');
+  $('#stress-options').querySelectorAll('.stress-opt').forEach((b) => { b.disabled = true; });
+  if (n === right) {
+    stressGame.score++;
+    fb.className = 'spell-feedback ok';
+    fb.innerHTML = '✓ 正确! <span class="spell-correct-word">' + esc(w.ru) + '</span>';
+  } else {
+    stressGame.wrong.push(w);
+    fb.className = 'spell-feedback no';
+    fb.innerHTML = '✗ 重音在第 ' + CN_ORD[right - 1] + ' 音节:<span class="spell-correct-word">' + esc(w.ru) + '</span>(' + esc(w.zh) + ')';
+  }
+  $('#stress-next').hidden = false;
+}
+function stressNext() {
+  stressGame.idx++;
+  if (stressGame.idx < stressGame.words.length) showStressQuestion();
+  else finishStress();
+}
+function finishStress() {
+  $('#stress-run').hidden = true;
+  $('#stress-result').hidden = false;
+  stressGame.wrong.forEach((w) => noteWrong(w)); // 错词进入错词本
+  const total = stressGame.words.length, score = stressGame.score;
+  $('#stress-result-score').textContent = score;
+  $('#stress-result-msg').textContent = score === total ? '满分!重音大师! 🎉'
+    : score >= total * 0.8 ? '非常棒!重音感觉越来越准了! 💪'
+    : score >= total * 0.6 ? '不错!错的重音多听几遍!'
+    : '别灰心,多听发音慢慢就有语感了!';
+  $('#stress-wrong').innerHTML = stressGame.wrong.length
+    ? stressGame.wrong.map((w, i) =>
+        '<div class="wrong-item fade-item" style="animation-delay:' + (i * 50) + 'ms"><button class="speak-btn small" data-speak="' + esc(w.ru) + '">🔊</button><span class="wrong-ru">' + esc(w.ru) + '</span><span class="wrong-zh">' + esc(w.zh) + '</span></div>').join('')
+    : '<p class="no-wrong">全部选对,没有错的重音! 👏</p>';
+}
+on('#stress-begin', 'click', startStress);
+on('#stress-again', 'click', startStress);
+on('#stress-next', 'click', stressNext);
+on('#stress-speak', 'click', () => { if (stressGame) speak(stressGame.words[stressGame.idx].ru); });
 
 // ========== 复习:艾宾浩斯计划 + 生词本 + 错词本 + 日历 ==========
 let reviewIdx = 0;
@@ -1010,7 +1129,55 @@ function updateHero() {
   $('#hero-learned').textContent = all.filter((w) => learned[wkey(w)]).length + ' / ' + all.length;
   $('#hero-best').textContent = quizBest == null ? '--' : quizBest;
   updateGoalUI(); // 每日目标卡片(含达成检测)
+  renderDailyWord(); // 每日一词(按日期+语言确定,当天不变)
 }
+
+// ========== 每日一词:按日期确定每天一个词,各语言独立 ==========
+const dailyWordOf = () => {
+  const all = allPackWords();
+  if (!all.length) return null;
+  const seed = lang.code + '_' + dstr(new Date());
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return all[h % all.length];
+};
+function renderDailyWord() {
+  if (!$('#daily-word-ru')) return; // 每日一词卡片只在首页
+  const w = dailyWordOf();
+  const now = new Date();
+  $('#daily-word-date').textContent = (now.getMonth() + 1) + ' 月 ' + now.getDate() + ' 日 · 每天一个新词';
+  const k = wkey(w);
+  const isKnown = !!learned[k];
+  $('#daily-word-ru').textContent = w.ru;
+  $('#daily-word-zh').textContent = w.zh;
+  $('#daily-word-meta').innerHTML =
+    '<span class="cat-tag">' + esc(w.cat) + '</span>' +
+    (w.level ? '<span class="cat-tag">' + esc(w.level) + '</span>' : '') +
+    (w.note ? '<span class="daily-word-note">' + esc(w.note) + '</span>' : '');
+  $('#daily-word-speak').dataset.speak = w.ru;
+  $('#daily-word-ex').innerHTML = exHTML(examplesOf(w));
+  const btn = $('#daily-word-known');
+  btn.classList.toggle('done', isKnown);
+  btn.disabled = isKnown;
+}
+const markDailyWord = () => {
+  const w = dailyWordOf();
+  if (!w) return;
+  const k = wkey(w);
+  learned[k] = true;
+  if (familiar[k]) { delete familiar[k]; saveFamiliar(); }
+  quizWrong = quizWrong.filter((x) => x !== k);
+  if (!wordReview[k]) {
+    newWordDates[k] = dstr(new Date());                       // 生词日历:记录首次学习日期
+    wordReview[k] = { stage: 0, nextDue: addDays(INTERVALS[0]), wrong: 0 };
+    saveWordDates(); saveWordReview();
+  }
+  saveLearned(); saveWrong();
+  renderDailyWord();
+  updateHero();
+  toast('✨ 已加入学习计划,明天起开始复习');
+};
+on('#daily-word-known', 'click', markDailyWord);
 
 // ========== 每日学习目标 ==========
 const todayLearnedCount = () => {
@@ -1069,8 +1236,11 @@ function updateQuizInfo() {
 function updateSpellInfo() {
   if (!$('#spell-info')) return;
   const n = learnedPool().length;
+  const text = spellMode === 'listen'
+    ? '听单词发音,拼出你听到的词。同样从你学习过的 <b>' + n + '</b> 个单词中随机抽 10 题。'
+    : '从你学习过的 <b>' + n + '</b> 个单词中随机抽 10 题进行拼写。';
   $('#spell-info').innerHTML = n >= 3
-    ? '从你学习过的 <b>' + n + '</b> 个单词中随机抽 10 题进行拼写。'
+    ? text
     : '先把至少 <b>3</b> 个单词标记为「认识」,再来拼写吧。';
   $('#spell-begin').disabled = n < 3;
 }
@@ -1107,6 +1277,8 @@ function initAll(newLang, quiet) {
   // 语法入口:该语言没有语法内容时隐藏导航链接
   const gLink = document.querySelector('.tab[data-tab="grammar"]');
   if (gLink) gLink.style.display = lang.hasGrammar ? '' : 'none';
+  // 俄语专属模块(重音练习等):其他语言自动隐藏
+  document.querySelectorAll('[data-ru-only]').forEach((el) => { el.style.display = lang.code === 'ru' ? '' : 'none'; });
 
   if (PAGE === 'home') {
     packOpen = false; // 打开首页先看词库包选择面板,点入包才展开单词
@@ -1142,6 +1314,7 @@ function initAll(newLang, quiet) {
     renderTwisters();
     renderDialogues();
     toggleRate();
+    updateStressInfo(); // 重音练习(俄语专属,其他语言整块隐藏)
   } else if (PAGE === 'phrases') {
     renderPhrases();
   } else if (PAGE === 'checkin') {
@@ -1318,9 +1491,77 @@ on('#goal-save', 'click', () => {
 });
 on('#goal-input', 'keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('#goal-save').click(); } });
 // Esc 关闭弹窗(查词 / 添加单词 / 目标)
+// ========== 磨耳朵:单词列表自动连续朗读(2026-09-04) ==========
+let ear = null; // {list, idx, playing, timer}
+const earList = () => {
+  let list = allPackWords();
+  const pool = $('#ear-pool').value;
+  if (pool === 'known') list = list.filter((w) => learned[wkey(w)]);
+  if (pool === 'new') list = list.filter((w) => !learned[wkey(w)]);
+  if ($('#ear-order').value === 'shuffle') shuffle(list);
+  return list;
+};
+function openEar() {
+  $('#ear-modal').hidden = false;
+  ear = { list: earList(), idx: 0, playing: false, timer: null };
+  $('#ear-ru').textContent = '—';
+  $('#ear-zh').textContent = '';
+  $('#ear-progress').textContent = '0 / ' + ear.list.length;
+  $('#ear-toggle').textContent = '▶ 开始';
+}
+function closeEar() {
+  if (ear && ear.timer) { clearTimeout(ear.timer); ear.timer = null; }
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  ear = null;
+  $('#ear-modal').hidden = true;
+}
+function earPlay() {
+  if (!ear) return;
+  const list = ear.list;
+  if (!list.length) { toast('没有符合条件的单词'); return; }
+  if (ear.idx >= list.length) { // 一轮播完,重新开始
+    if ($('#ear-order').value === 'shuffle') shuffle(list);
+    ear.idx = 0;
+  }
+  if (ear.timer) { clearTimeout(ear.timer); ear.timer = null; }
+  ear.playing = false;
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel(); // 旧 onend 触发时 playing=false 直接返回
+  ear.playing = true;
+  const w = list[ear.idx];
+  $('#ear-ru').textContent = w.ru;
+  $('#ear-zh').textContent = w.zh;
+  $('#ear-progress').textContent = (ear.idx + 1) + ' / ' + list.length;
+  $('#ear-toggle').textContent = '⏸ 暂停';
+  speak(w.ru, speakRate, () => {
+    if (!ear || !ear.playing) return;
+    ear.timer = setTimeout(() => { ear.idx++; earPlay(); }, parseInt($('#ear-gap').value, 10));
+  });
+}
+function earPause() {
+  if (!ear) return;
+  if (ear.timer) { clearTimeout(ear.timer); ear.timer = null; }
+  ear.playing = false;
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  $('#ear-toggle').textContent = '▶ 继续';
+}
+function earToggle() { if (ear) { ear.playing ? earPause() : earPlay(); } }
+function earNext() {
+  if (!ear || !ear.list.length) return;
+  if (ear.timer) { clearTimeout(ear.timer); ear.timer = null; }
+  ear.idx++;
+  if (ear.idx >= ear.list.length) { toast('已到最后一个,再播一遍'); ear.idx = 0; }
+  earPlay();
+}
+on('#ear-open', 'click', openEar);
+on('#ear-toggle', 'click', earToggle);
+on('#ear-next', 'click', earNext);
+on('#ear-close', 'click', closeEar);
+
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   ['#search-modal', '#add-modal', '#goal-modal'].forEach((s) => { const m = $(s); if (m && !m.hidden) m.hidden = true; });
+  const em = $('#ear-modal');
+  if (em && !em.hidden) closeEar();
 });
 on('#export-btn', 'click', (e) => { e.preventDefault(); exportData(); });
 on('#import-btn', 'click', (e) => { e.preventDefault(); $('#import-file').click(); });

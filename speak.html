@@ -65,6 +65,37 @@
   <section class="tab-panel active">
     <div class="panel-head"><h2>口语练习</h2></div>
 
+    <div id="stress-panel" data-ru-only>
+      <h3 class="sec-title">🎯 重音练习</h3>
+      <p class="sub-tip">听发音,选出重音在第几个音节。重音是俄语的灵魂。</p>
+      <div id="stress-start" class="quiz-start">
+        <p id="stress-info">从你学习过的单词中抽 10 个练重音。</p>
+        <button class="btn btn-primary btn-lg" id="stress-begin">开始练习</button>
+      </div>
+      <div id="stress-run" hidden>
+        <div class="quiz-top">
+          <span id="stress-qnum">第 1 题</span>
+          <span id="stress-progress">1 / 10</span>
+        </div>
+        <div class="spell-question">
+          <button class="speak-btn" id="stress-speak" title="点击朗读">🔊</button>
+          <div class="stress-word" id="stress-word"></div>
+          <div class="spell-hint">提示:单词不带重音显示,听完发音选重音位置;没听清点左上角 🔊</div>
+        </div>
+        <div class="stress-options" id="stress-options"></div>
+        <div class="spell-feedback" id="stress-feedback"></div>
+        <button class="btn btn-primary" id="stress-next" hidden>下一题 →</button>
+      </div>
+      <div id="stress-result" hidden>
+        <div class="result-box">
+          <div class="score-ring"><span id="stress-result-score">0</span><small>/ 10</small></div>
+          <p class="result-msg" id="stress-result-msg"></p>
+        </div>
+        <div class="wrong-list" id="stress-wrong"></div>
+        <button class="btn btn-primary btn-lg" id="stress-again">再来一次</button>
+      </div>
+    </div>
+
     <div id="speak-letters">
       <h3 class="sec-title">🔤 发音基础:字母表</h3>
       <p class="sub-tip">先过一遍字母发音再开始跟读。点 🔊 听示例单词。</p>

@@ -68,6 +68,10 @@
       <div class="stats">看中文,拼单词,练就「听写式」记忆</div>
     </div>
     <div id="spell-start" class="quiz-start">
+      <div class="spell-mode-tabs">
+        <button class="spell-mode-tab active" id="spell-mode-see">⌨️ 看义拼写</button>
+        <button class="spell-mode-tab" id="spell-mode-listen">🎧 听音拼写</button>
+      </div>
       <p id="spell-info">从你学习过的单词中随机抽 10 题进行拼写。</p>
       <button class="btn btn-primary btn-lg" id="spell-begin">开始拼写</button>
     </div>
@@ -79,7 +83,7 @@
       <div class="spell-question">
         <button class="speak-btn" id="spell-speak" title="听发音提示">🔊</button>
         <div class="spell-zh" id="spell-zh"></div>
-        <div class="spell-hint">提示:重音符号 ́ 不用打,例如 привет 也算对</div>
+        <div class="spell-hint" id="spell-hint">提示:重音符号 ́ 不用打,例如 привет 也算对</div>
       </div>
       <div class="spell-input-row">
         <input id="spell-input" type="text" placeholder="在这里输入单词…" autocomplete="off" spellcheck="false">
