@@ -1,4 +1,11 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(curl -s https://cemeth.github.io/shiyu/index.html)",
+      "Bash(curl -s https://cemeth.github.io/shiyu/style.css)",
+      "Bash(curl -sI https://cemeth.github.io/shiyu/style.css)"
+    ]
+  },
   "skills": {
     "autoApply": [
       "redesign-existing-projects",
