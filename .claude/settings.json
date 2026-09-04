@@ -9,7 +9,9 @@
       "Bash(git commit *)",
       "Bash(git push *)",
       "Bash(start \"\" https://cemeth.github.io/shiyu/)",
-      "Bash(npx -y html-validate checkin.html)"
+      "Bash(npx -y html-validate checkin.html)",
+      "Bash(git commit -m '打卡页视觉升级：火焰动画 + 月度进度环 + 里程碑激励 *)",
+      "Bash(npx -y html-validate index.html review.html checkin.html)"
     ]
   },
   "skills": {

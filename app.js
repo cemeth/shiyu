@@ -44,6 +44,7 @@ let curIdx = 0;                        // 当前卡片下标
 let filtered = [];                     // 筛选后的单词列表
 let curWord = null;                    // 当前卡片单词
 let vocabOrder = 'seq';                // 浏览顺序 seq / rand
+let reviewShuffle = false;             // 复习页是否乱序
 let speakRate = 1;                     // 朗读速度
 let quiz = null;                       // 测验状态 {words, idx, score, wrong, opts}
 let toastTimer = null;
@@ -106,10 +107,11 @@ function loadState() {
     wrongStreak = JSON.parse(localStorage.getItem(pkey('wrong_streak')) || '{}');
     achievements = JSON.parse(localStorage.getItem(pkey('achievements')) || '{}');
     quizLog = JSON.parse(localStorage.getItem(pkey('quiz_log')) || '{}');
+    reviewShuffle = localStorage.getItem(pkey('review_shuffle')) === '1';
   } catch (e) {
     learned = {}; customWords = []; checkinDates = []; quizBest = null; quizWrong = [];
     newWordDates = {}; wordReview = {}; familiar = {}; dailyGoal = 0; goalCelebrated = ''; reviewLog = {};
-    wrongStreak = {}; achievements = {}; quizLog = {};
+    wrongStreak = {}; achievements = {}; quizLog = {}; reviewShuffle = false;
   }
 }
 const saveLearned = () => localStorage.setItem(pkey('learned'), JSON.stringify(learned));
@@ -300,6 +302,8 @@ const exHTML = (exs) => exs.length ? '<span class="example-title">💬 例句 ·
   '<span class="example-zh">' + esc(e[1]) + '</span></button>').join('') : '';
 function renderCard() {
   $('#flashcard').classList.remove('flipped');
+  const shuffleBtn = $('#card-shuffle');
+  if (shuffleBtn) { shuffleBtn.classList.toggle('active', vocabOrder === 'rand'); }
   curWord = filtered[curIdx] || null;
   if (curWord) {
     $('#card-ru').textContent = curWord.ru;
@@ -466,7 +470,7 @@ function importBulkWords() {
     }
     $('#vocab-level').style.display = '';
     renderPackTabs();
-    catFilter = cat;
+    catFilter = '';                                               // 导入后显示全部单词
     $('#vocab-search').value = '';
     vocabOrder = 'seq';
     $('#vocab-order').value = 'seq';
@@ -506,7 +510,7 @@ function saveCustomWord() {
     }
     $('#vocab-level').style.display = '';
     renderPackTabs();
-    catFilter = cat;
+    catFilter = '';                                               // 导入后显示全部单词
     $('#vocab-search').value = '';
     vocabOrder = 'seq';
     $('#vocab-order').value = 'seq';
@@ -858,6 +862,8 @@ function renderDueView() {
   $('#review-empty').hidden = total > 0;
   $('#review-run').hidden = !total;
   if (reviewIdx >= total) reviewIdx = 0;
+  const shuffleBtn = $('#review-shuffle');
+  if (shuffleBtn) { shuffleBtn.classList.toggle('active', reviewShuffle); }
   $('#review-card').classList.remove('flipped');
   reviewWord = dueQueue[reviewIdx] || null;
   if (reviewWord) {
@@ -1554,6 +1560,13 @@ on('#word-grid', 'click', (e) => {
 on('#vocab-level', 'change', applyFilter);
 on('#vocab-search', 'input', applyFilter);
 on('#vocab-order', 'change', (e) => { vocabOrder = e.target.value; applyFilter(); });
+on('#card-shuffle', 'click', () => {
+  if (filtered.length < 2) { toast('词太少,无法随机'); return; }
+  shuffle(filtered);
+  curIdx = 0;
+  renderCard();
+  toast('已随机打乱顺序 🔀');
+});
 
 // 词库包页签切换(未进入时点击 = 进入该包)
 on('#pack-tabs', 'click', (e) => {
@@ -1638,6 +1651,20 @@ on('#review-prev', 'click', () => reviewNext(-1));
 on('#review-next', 'click', () => reviewNext(1));
 on('#review-known', 'click', reviewKnown);
 on('#review-new', 'click', reviewStillNew);
+on('#review-shuffle', 'click', () => {
+  if (dueQueue.length < 2) { toast('待复习词太少,无法随机'); return; }
+  reviewShuffle = !reviewShuffle;
+  localStorage.setItem(pkey('review_shuffle'), reviewShuffle ? '1' : '0');
+  if (reviewShuffle) {
+    shuffle(dueQueue);
+    reviewIdx = 0;
+  } else {
+    dueQueue = dueWords();
+    reviewIdx = 0;
+  }
+  renderDueView();
+  toast(reviewShuffle ? '已切换为随机顺序 🔀' : '已切换为顺序复习');
+});
 on('#quiz-next', 'click', () => {
   quiz.idx++;
   if (quiz.idx < quiz.words.length) showQuizQuestion(); else finishQuiz();

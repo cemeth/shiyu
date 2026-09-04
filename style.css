@@ -425,6 +425,17 @@ p { color: var(--text-secondary); font-size: clamp(1.0625rem, 1.5vw, 1.125rem); 
 }
 .card-actions .btn-soft-danger, .card-actions .btn-warn, .card-actions .btn-success { min-width: 110px; }
 .card-main-btn { padding: 12px 28px; font-size: 14px; }
+.card-shuffle-btn, .review-shuffle-btn {
+  min-width: 64px;
+  padding: 8px 14px;
+  font-size: 13px;
+  border-radius: var(--radius-sm);
+}
+.card-shuffle-btn.active, .review-shuffle-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
 .btn-nav {
   min-width: 38px; padding: 10px 12px; background: var(--card);
   border: 1px solid var(--border); color: var(--text-muted); border-radius: var(--radius-sm);
