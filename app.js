@@ -26,6 +26,7 @@ let learned = {};                      // { 单词键: true }
 let customWords = [];                  // 用户自建单词 [{cat, ru, zh}]
 let checkinDates = [];                 // ['YYYY-MM-DD']
 let quizBest = null;                   // 最高测验分
+let quizLog = {};                      // { 'YYYY-MM-DD': {total, correct, avgStress} } 每日测验记录
 let quizWrong = [];                    // 测验/拼写做错的单词键(错词本数据)
 let packId = 'base';                   // 当前词库包
 let catFilter = '';                    // 当前分类筛选(胶囊)
@@ -104,10 +105,11 @@ function loadState() {
     reviewLog = JSON.parse(localStorage.getItem(pkey('review_log')) || '{}');
     wrongStreak = JSON.parse(localStorage.getItem(pkey('wrong_streak')) || '{}');
     achievements = JSON.parse(localStorage.getItem(pkey('achievements')) || '{}');
+    quizLog = JSON.parse(localStorage.getItem(pkey('quiz_log')) || '{}');
   } catch (e) {
     learned = {}; customWords = []; checkinDates = []; quizBest = null; quizWrong = [];
     newWordDates = {}; wordReview = {}; familiar = {}; dailyGoal = 0; goalCelebrated = ''; reviewLog = {};
-    wrongStreak = {}; achievements = {};
+    wrongStreak = {}; achievements = {}; quizLog = {};
   }
 }
 const saveLearned = () => localStorage.setItem(pkey('learned'), JSON.stringify(learned));
@@ -120,6 +122,7 @@ const saveWordReview = () => localStorage.setItem(pkey('word_review'), JSON.stri
 const saveFamiliar = () => localStorage.setItem(pkey('familiar'), JSON.stringify(familiar));
 const saveWrongStreak = () => localStorage.setItem(pkey('wrong_streak'), JSON.stringify(wrongStreak));
 const saveAchievements = () => localStorage.setItem(pkey('achievements'), JSON.stringify(achievements));
+const saveQuizLog = () => localStorage.setItem(pkey('quiz_log'), JSON.stringify(quizLog));
 
 // ========== 词库包 ==========
 // 每个词库包独立浏览、独立统计、独立复习
@@ -591,6 +594,13 @@ function finishQuiz() {
     : '<p class="no-wrong">全部答对,没有错题! 👏</p>';
   updateHero();
   checkAchievements(); // 成就:测验最高分
+  // 记录今日测验成绩供周报使用
+  const qd = dstr(new Date());
+  if (!quizLog[qd]) quizLog[qd] = { total: 0, correct: 0, count: 0 };
+  quizLog[qd].total += total;
+  quizLog[qd].correct += score;
+  quizLog[qd].count += 1;
+  saveQuizLog();
 }
 
 // ========== 拼写练习(看义拼写 / 听音拼写双模式) ==========
@@ -681,6 +691,13 @@ function finishSpell() {
     : score >= total * 0.8 ? '非常棒!继续保持! 💪'
     : score >= total * 0.6 ? '不错!错词再抄写几遍吧!'
     : '别灰心,多翻翻单词卡再来一次!';
+  // 记录今日拼写成绩供周报使用
+  const qd = dstr(new Date());
+  if (!quizLog[qd]) quizLog[qd] = { total: 0, correct: 0, count: 0 };
+  quizLog[qd].total += total;
+  quizLog[qd].correct += score;
+  quizLog[qd].count += 1;
+  saveQuizLog();
   const box = $('#spell-wrong');
   box.innerHTML = spell.wrong.length
     ? spell.wrong.map((w, i) =>
@@ -1138,6 +1155,7 @@ function renderCheckin() {
   $('#calendar').innerHTML = html;
   renderStats(); // 学习统计趋势图
   renderAchievements(); // 成就徽章墙
+  renderWeeklyReport(); // 周报
   updateHero();
 }
 
@@ -1851,7 +1869,81 @@ function renderStats() {
   });
 }
 
-// ========== 启动 ==========
+// ========== 周报 ==========
+let weekOffset = 0; // 0=本周, -1=上周, 1=下周
+const DAYS = ['一', '二', '三', '四', '五', '六', '日'];
+function getWeekRange(offset) {
+  const now = new Date();
+  const dayOfWeek = (now.getDay() + 6) % 7; // 0=周一
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - dayOfWeek + offset * 7);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  return { start: monday, end: sunday };
+}
+function renderWeeklyReport() {
+  const range = getWeekRange(weekOffset);
+  const startStr = dstr(range.start), endStr = dstr(range.end);
+  $('#weekly-range-label').textContent = startStr + ' ~ ' + endStr;
+  // 本周按钮高亮
+  $('#weekly-today').classList.toggle('active', weekOffset === 0);
+  // 收集本周数据
+  const dayData = [];
+  let totalNew = 0, totalRev = 0, totalQuiz = 0, totalQuizCorrect = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(range.start);
+    d.setDate(range.start.getDate() + i);
+    const ds = dstr(d);
+    const n = Object.values(newWordDates).filter((x) => x === ds).length;
+    const r = reviewLog[ds] || 0;
+    const ql = quizLog[ds];
+    const qCorrect = ql ? ql.correct : 0;
+    const qTotal = ql ? ql.total : 0;
+    const qCount = ql ? ql.count : 0;
+    if (n) totalNew += n;
+    if (r) totalRev += r;
+    if (qTotal) { totalQuiz++; totalQuizCorrect += qCorrect; }
+    dayData.push({
+      ds,
+      label: DAYS[i],
+      new: n,
+      rev: r,
+      quizTotal: qTotal,
+      quizCorrect: qCorrect,
+      quizCount: qCount,
+      checked: checkinDates.includes(ds),
+    });
+  }
+  const avgQuiz = totalQuiz > 0 ? Math.round(totalQuizCorrect / totalQuiz) : 0;
+  // 判断今天是否已打卡(仅本周显示)
+  const todayChecked = weekOffset === 0 && checkinDates.includes(dstr(new Date()));
+  // 渲染 7 天网格
+  const maxVal = Math.max(1, ...dayData.map((d) => d.new + d.rev));
+  const dayCards = dayData.map((d) => {
+    const isToday = d.ds === dstr(new Date()) && weekOffset === 0;
+    const h = Math.max(4, Math.round((d.new + d.rev) / maxVal * 80));
+    const checkMark = d.checked ? '✓' : '';
+    return '<div class="week-day' + (isToday ? ' is-today' : '') + '">' +
+      '<div class="week-day-label">' + d.label + (isToday ? ' <em>今</em>' : '') + '</div>' +
+      '<div class="week-bar-wrap"><div class="week-bar" style="height:' + h + 'px"></div></div>' +
+      '<div class="week-day-num">' + (d.new + d.rev) + '</div>' +
+      '<div class="week-day-check">' + (d.checked ? '✓' : '') + '</div>' +
+      '</div>';
+  }).join('');
+  $('#weekly-grid').innerHTML = dayCards;
+  // 底部统计
+  $('#weekly-footer').innerHTML =
+    '<div class="weekly-stat"><span>新学</span><b>' + totalNew + '</b></div>' +
+    '<div class="weekly-stat"><span>复习</span><b>' + totalRev + '</b></div>' +
+    '<div class="weekly-stat"><span>测验</span><b>' + totalQuiz + '</b>次</div>' +
+    '<div class="weekly-stat"><span>均分</span><b>' + avgQuiz + '</b>/10</div>' +
+    '<div class="weekly-stat"><span>打卡</span><b>' + dayData.filter((d) => d.checked).length + '</b>/7天</div>';
+}
+function initWeeklyNav() {
+  on('#weekly-prev', 'click', () => { weekOffset--; renderWeeklyReport(); });
+  on('#weekly-today', 'click', () => { weekOffset = 0; renderWeeklyReport(); });
+  on('#weekly-next', 'click', () => { weekOffset++; if (weekOffset > 0) weekOffset = 0; renderWeeklyReport(); });
+}
 // 按顺序动态加载脚本(语言数据包、例句文件),全部就绪后回调
 function loadScripts(files, done) {
   let i = 0;
@@ -1865,6 +1957,7 @@ function loadScripts(files, done) {
 }
 initTheme();
 initLangSelect();
+initWeeklyNav();
 // 恢复上次选择的语言(跨页面保持一致);非俄语需要动态加载数据包
 const bootLang = window.LANGS.find((l) => l.code === (localStorage.getItem('lang_code') || 'ru')) || window.LANGS[0];
 // 例句还没就位时,跟着数据包按需加载(EXAMPLES_<语言码> 大写在 window 上)
