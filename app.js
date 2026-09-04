@@ -1162,7 +1162,30 @@ function applyAccent(id) {
 
 function renderDarkBtn() {
   const dark = document.body.classList.contains('dark');
-  $('#theme-dark-btn').textContent = dark ? '☀️ 深色模式:开' : '🌙 深色模式:关';
+  $('#theme-dark-btn').textContent = dark ? '深色模式: 开' : '深色模式: 关';
+}
+
+const LAYOUTS = [
+  { id: 'tech',    name: '科技风', desc: '当前默认 · 简约几何' },
+  { id: 'editorial', name: '编辑风', desc: '大留白 · 衬线标题' },
+  { id: 'compact',   name: '紧凑风', desc: '高信息密度 · 工具感' },
+  { id: 'warm',      name: '温暖风', desc: '纸质感 · 学术气质' },
+];
+const curLayout = localStorage.getItem('site_layout') || 'tech';
+
+function applyLayout(id) {
+  document.body.dataset.layout = LAYOUTS.some((l) => l.id === id) ? id : 'tech';
+  localStorage.setItem('site_layout', document.body.dataset.layout);
+  document.querySelectorAll('.layout-swatch').forEach((el) =>
+    el.classList.toggle('active', el.dataset.id === document.body.dataset.layout));
+}
+
+function initLayout() {
+  applyLayout(curLayout);
+  $('#layout-swatches').innerHTML = LAYOUTS.map((l) =>
+    '<button class="layout-swatch' + (l.id === curLayout ? ' active' : '') + '" data-id="' + l.id + '" title="' + l.desc + '">' +
+    '<span class="layout-swatch-name">' + l.name + '</span>' +
+    '<span class="layout-swatch-desc">' + l.desc + '</span></button>').join('');
 }
 
 function initTheme() {
@@ -1175,6 +1198,7 @@ function initTheme() {
     '<span class="theme-swatch-dot" style="background:linear-gradient(135deg,' + t.c1 + ',' + t.c2 + ')"></span>' +
     '<span class="theme-swatch-name">' + t.name + '</span></button>').join('');
   applyAccent(curTheme);
+  initLayout();
 }
 on('#theme-toggle', 'click', (e) => {
   e.stopPropagation();
@@ -1186,6 +1210,10 @@ document.addEventListener('click', (e) => {
 on('#theme-swatches', 'click', (e) => {
   const btn = e.target.closest('.theme-swatch');
   if (btn) applyAccent(btn.dataset.id);
+});
+on('#layout-swatches', 'click', (e) => {
+  const btn = e.target.closest('.layout-swatch');
+  if (btn) applyLayout(btn.dataset.id);
 });
 on('#theme-dark-btn', 'click', () => {
   const dark = !document.body.classList.contains('dark');
@@ -1203,8 +1231,14 @@ function updateHero() {
   $('#hero-date').textContent = d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日 · 星期' + '日一二三四五六'[d.getDay()];
   $('#hero-streak').textContent = calcStreak(checkinDates);
   const all = allPackWords();
-  $('#hero-learned').textContent = all.filter((w) => learned[wkey(w)]).length + ' / ' + all.length;
-  $('#hero-best').textContent = quizBest == null ? '--' : quizBest;
+  const learnedCount = all.filter((w) => learned[wkey(w)]).length;
+  // 数字递增动画
+  animateNum($('#hero-learned'), learnedCount, 600);
+  animateNum($('#hero-best'), quizBest, 600);
+  // learned 显示格式特殊: "N / TOTAL"
+  setTimeout(() => {
+    if ($('#hero-learned')) $('#hero-learned').textContent = learnedCount + ' / ' + all.length;
+  }, 620);
   updateGoalUI(); // 每日目标卡片(含达成检测)
   renderDailyWord(); // 每日一词(按日期+语言确定,当天不变)
 }
@@ -1835,6 +1869,33 @@ initLangSelect();
 const bootLang = window.LANGS.find((l) => l.code === (localStorage.getItem('lang_code') || 'ru')) || window.LANGS[0];
 // 例句还没就位时,跟着数据包按需加载(EXAMPLES_<语言码> 大写在 window 上)
 const needEx = (l) => (l.ex && l.ex.length && !window['EXAMPLES_' + l.code.toUpperCase()]);
+// 滚动渐入动画(IntersectionObserver)
+(function initScrollReveal() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+})();
+
+// 数字递增动画
+function animateNum(el, target, duration) {
+  if (!target || isNaN(target)) return;
+  const start = 0;
+  const startTime = performance.now();
+  function step(now) {
+    const progress = Math.min((now - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(start + (target - start) * eased);
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
 const bootAfterLang = (l) => { if (needEx(l)) loadScripts(l.ex, () => initAll(l, true)); else initAll(l, true); };
 if (loadedCodes.has(bootLang.code) && dataOwner === bootLang.code) {
   bootAfterLang(bootLang);

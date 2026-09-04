@@ -34,35 +34,42 @@
       </div>
     </div>
     <div class="header-right">
-      <button id="search-btn" class="theme-toggle" title="查词搜索">🔍</button>
+      <button id="search-btn" class="theme-toggle" title="查词搜索">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
       <div class="theme-wrap">
-        <button id="theme-toggle" class="theme-toggle" title="主题配色与深色模式">🎨</button>
+        <button id="theme-toggle" class="theme-toggle" title="主题配色与深色模式">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20"/></svg>
+        </button>
         <div class="theme-panel" id="theme-panel">
-          <div class="theme-panel-title">🎨 主题配色</div>
+          <div class="theme-panel-title">主题配色</div>
           <div class="theme-swatches" id="theme-swatches"></div>
           <div class="theme-panel-divider"></div>
-          <button class="theme-dark-btn" id="theme-dark-btn">🌙 深色模式:关</button>
+          <div class="theme-panel-title">排版风格</div>
+          <div class="layout-swatches" id="layout-swatches"></div>
+          <div class="theme-panel-divider"></div>
+          <button class="theme-dark-btn" id="theme-dark-btn">深色模式: 关</button>
         </div>
       </div>
       <select id="lang-select" class="lang-select" title="选择语言"></select>
     </div>
   </div>
     <nav class="tabs">
-    <a class="tab active" href="index.html">📚 背单词</a>
-    <a class="tab" href="quiz.html">✏️ 小测验</a>
-    <a class="tab" href="spell.html">⌨️ 拼写</a>
-    <a class="tab" href="review.html">🔄 复习</a>
-    <a class="tab" href="speak.html">🗣️ 口语</a>
-    <a class="tab" href="phrases.html">💬 日常用语</a>
-    <a class="tab" href="grammar.html" data-tab="grammar">📖 语法</a>
-    <a class="tab" href="checkin.html">🔥 打卡</a>
+    <a class="tab active" href="index.html">背单词</a>
+    <a class="tab" href="quiz.html">小测验</a>
+    <a class="tab" href="spell.html">拼写</a>
+    <a class="tab" href="review.html">复习</a>
+    <a class="tab" href="speak.html">口语</a>
+    <a class="tab" href="phrases.html">日常用语</a>
+    <a class="tab" href="grammar.html" data-tab="grammar">语法</a>
+    <a class="tab" href="checkin.html">打卡</a>
     </nav>
 </header>
 
 <main class="container">
 
   <!-- 概览 -->
-  <section class="hero">
+  <section class="hero reveal">
     <div class="hero-main">
       <h2 id="hero-greet">你好!</h2>
       <p class="hero-date" id="hero-date"></p>
@@ -72,25 +79,30 @@
       </div>
     </div>
     <div class="hero-stats">
-      <div class="stat-card"><div class="stat-num" id="hero-streak">0</div><div class="stat-label">🔥 连续打卡(天)</div></div>
-      <div class="stat-card"><div class="stat-num" id="hero-learned">0</div><div class="stat-label">📚 已掌握单词</div></div>
-      <div class="stat-card"><div class="stat-num" id="hero-best">--</div><div class="stat-label">🏆 测验最高分</div></div>
-      <div class="stat-card goal-card" id="hero-goal" title="点击设置每日学习目标">
+      <div class="stat-card reveal reveal-delay-1"><div class="stat-num" id="hero-streak">0</div><div class="stat-label">连续打卡(天)</div></div>
+      <div class="stat-card reveal reveal-delay-2"><div class="stat-num" id="hero-learned">0</div><div class="stat-label">已掌握单词</div></div>
+      <div class="stat-card reveal reveal-delay-3"><div class="stat-num" id="hero-best">--</div><div class="stat-label">测验最高分</div></div>
+      <div class="stat-card goal-card reveal reveal-delay-3" id="hero-goal" title="点击设置每日学习目标">
         <div class="stat-num" id="goal-num">--</div>
-        <div class="stat-label" id="goal-label">🎯 设个每日目标</div>
+        <div class="stat-label" id="goal-label">设个每日目标</div>
         <div class="goal-bar"><i id="goal-bar-fill"></i></div>
       </div>
     </div>
   </section>
 
   <!-- 每日一词 -->
-  <section class="tab-panel active">
+  <section class="tab-panel active reveal">
     <div class="panel-head">
-      <h2>🌅 每日一词</h2>
-      <span class="sub-tip" id="daily-word-date"></span>
+      <h2>每日一词</h2>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="today-badge">今日精选</span>
+        <span class="sub-tip" id="daily-word-date"></span>
+      </div>
     </div>
     <div class="daily-word">
-      <button class="speak-btn" id="daily-word-speak" title="点击朗读">🔊</button>
+      <button class="speak-btn" id="daily-word-speak" title="点击朗读">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </button>
       <div class="daily-word-main">
         <div class="daily-word-ru" id="daily-word-ru">—</div>
         <div class="daily-word-zh" id="daily-word-zh"></div>
@@ -98,25 +110,25 @@
       </div>
       <div class="daily-word-ex" id="daily-word-ex"></div>
       <div class="daily-word-actions">
-        <button class="btn btn-primary" id="daily-word-known">✓ 已学会</button>
+        <button class="btn btn-primary" id="daily-word-known">已学会</button>
       </div>
     </div>
   </section>
 
   <!-- 背单词 -->
-  <section class="tab-panel active">
+  <section class="tab-panel active reveal">
     <div class="panel-head">
       <h2>背单词</h2>
       <div class="panel-head-right">
         <div class="stats"><span>已掌握 <b id="vocab-learned-count">0</b> / <b id="vocab-total">0</b></span><span class="stats-bar"><i id="stats-bar-fill"></i></span></div>
-        <button class="btn btn-light btn-sm" id="ear-open" title="自动连续朗读单词,磨耳朵">🎧 磨耳朵</button>
+        <button class="btn btn-light btn-sm" id="ear-open" title="自动连续朗读单词,磨耳朵">磨耳朵</button>
       </div>
     </div>
     <div class="pack-tabs" id="pack-tabs"></div>
 
     <!-- 词库包选择面板:点入某个词库包后才显示单词 -->
     <div class="pack-gate" id="pack-gate">
-      <p class="sub-tip">👆 选择一个词库包开始学习</p>
+      <p class="sub-tip">选择一个词库包开始学习</p>
       <div class="pack-gate-grid" id="pack-gate-grid"></div>
     </div>
 
@@ -132,19 +144,21 @@
           <option>C1</option>
           <option>C2</option>
         </select>
-        <input id="vocab-search" type="search" placeholder="搜索单词…">
+        <input id="vocab-search" type="search" placeholder="搜索单词...">
         <select id="vocab-order" title="浏览顺序">
           <option value="seq">顺序浏览</option>
           <option value="rand">随机浏览</option>
         </select>
-        <button id="vocab-add-btn" class="btn btn-outline">+ 添加单词</button>
+        <button id="vocab-add-btn" class="btn btn-outline">添加单词</button>
       </div>
       <div class="cat-chips" id="vocab-category"></div>
       <div class="flashcard" id="flashcard">
         <div class="flashcard-inner">
           <div class="flashcard-face flashcard-front">
-            <button class="speak-btn" id="card-speak" title="听发音">🔊</button>
-            <span class="known-badge" id="card-known-badge" hidden>✓ 已掌握</span>
+            <button class="speak-btn" id="card-speak" title="听发音">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            </button>
+            <span class="known-badge" id="card-known-badge" hidden>已掌握</span>
             <div class="ru-word" id="card-ru">—</div>
             <div class="hint">点击卡片查看意思</div>
           </div>
@@ -158,17 +172,21 @@
         </div>
       </div>
       <div class="card-actions">
-        <button class="btn btn-nav" id="card-prev" title="上一个">←</button>
-        <button class="btn btn-soft-danger" id="card-new">😕 不认识</button>
-        <button class="btn btn-warn" id="card-familiar">🤔 不熟悉</button>
-        <button class="btn btn-success card-main-btn" id="card-known">😊 认识</button>
-        <button class="btn btn-nav" id="card-next" title="下一个">→</button>
+        <button class="btn btn-nav" id="card-prev" title="上一个">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="btn btn-soft-danger" id="card-new">不认识</button>
+        <button class="btn btn-warn" id="card-familiar">不熟悉</button>
+        <button class="btn btn-success card-main-btn" id="card-known">认识</button>
+        <button class="btn btn-nav" id="card-next" title="下一个">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
       </div>
       <p class="progress-text" id="card-progress"></p>
       <div class="known-bar"><div class="known-bar-fill" id="known-bar-fill"></div></div>
       <button class="word-grid-toggle" id="word-grid-toggle" title="展开 / 收起单词列表">
         <span class="word-grid-title" id="word-grid-title"></span>
-        <span class="grid-toggle-arrow" id="grid-toggle-arrow">▾</span>
+        <span class="grid-toggle-arrow" id="grid-toggle-arrow">↓</span>
       </button>
       <div class="word-grid-wrap" id="word-grid-wrap">
         <div class="word-grid" id="word-grid"></div>
@@ -181,42 +199,44 @@
 <footer class="site-footer">
   拾语 · 学习数据保存在本地浏览器(localStorage)
   <span class="footer-ops">
-    <a href="#" id="export-btn">📤 导出数据</a>
-    <a href="#" id="import-btn">📥 导入数据</a>
+    <a href="#" id="export-btn">导出数据</a>
+    <a href="#" id="import-btn">导入数据</a>
   </span>
 </footer>
 
 <div class="toast" id="toast"></div>
 
 <!-- 一键添加单词(悬浮按钮) -->
-<button id="fab-add" class="fab" title="一键添加单词">＋</button>
+<button id="fab-add" class="fab" title="一键添加单词">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
 
 <!-- 添加单词弹窗 -->
 <div class="modal" id="add-modal" hidden>
   <div class="modal-box">
-    <h3>✍️ 添加单词</h3>
+    <h3>添加单词</h3>
     <div class="add-mode-tabs">
       <button class="add-mode-tab active" data-mode="single">单个添加</button>
       <button class="add-mode-tab" data-mode="bulk">批量导入</button>
     </div>
     <div id="add-single-view">
-      <label class="modal-label" for="add-ru">俄语单词(可带重音符号 ́)</label>
-      <input id="add-ru" type="text" placeholder="如: молоко́">
+      <label class="modal-label" for="add-ru">俄语单词(可带重音符号)</label>
+      <input id="add-ru" type="text" placeholder="如: молоко">
       <label class="modal-label" for="add-zh">中文意思</label>
       <input id="add-zh" type="text" placeholder="如: 牛奶">
       <label class="modal-label" for="add-cat">分类(可选,可直接输入新分类)</label>
       <input id="add-cat" type="text" list="add-cat-list" placeholder="如: 场景·厨房做饭(不填归入「自定义」)">
       <datalist id="add-cat-list"></datalist>
       <label class="modal-label" for="add-note">备注(可选,显示在卡片背面)</label>
-      <input id="add-note" type="text" placeholder="如: 接第3格:звони́ть кому́">
-      <p class="modal-tip">💡 保存后自动标记「认识」,直接进入艾宾浩斯复习计划</p>
+      <input id="add-note" type="text" placeholder="如: 接第3格:звонить кому">
+      <p class="modal-tip">保存后自动标记「认识」,直接进入艾宾浩斯复习计划</p>
     </div>
     <div id="add-bulk-view" hidden>
       <label class="modal-label" for="add-bulk-cat">导入到分类(可选,不填归入「自定义」)</label>
       <input id="add-bulk-cat" type="text" list="add-cat-list" placeholder="如: 场景·餐厅点餐">
       <label class="modal-label" for="add-bulk-text">每行一个单词:单词 | 意思 | 备注(备注可选)</label>
-      <textarea id="add-bulk-text" rows="8" placeholder="молоко́ | 牛奶&#10;звони́ть | 打电话 | 接第 3 格"></textarea>
-      <p class="modal-tip">💡 支持 | 、Tab 或多个空格分隔;一键导入后全部自动标记「认识」并进入艾宾浩斯复习计划,重复的单词自动跳过</p>
+      <textarea id="add-bulk-text" rows="8" placeholder="молоко | 牛奶&#10;звонить | 打电话 | 接第 3 格"></textarea>
+      <p class="modal-tip">支持 | 、Tab 或多个空格分隔;一键导入后全部自动标记「认识」并进入艾宾浩斯复习计划,重复的单词自动跳过</p>
     </div>
     <div class="modal-actions">
       <button class="btn btn-light" id="add-cancel">取消</button>
@@ -228,8 +248,8 @@
 <!-- 查词搜索弹窗(任意页面可用) -->
 <div class="modal" id="search-modal" hidden>
   <div class="modal-box search-box">
-    <h3>🔍 查词</h3>
-    <input id="search-input" type="search" placeholder="输入单词或中文意思,如: молоко́ 或 牛奶">
+    <h3>查词</h3>
+    <input id="search-input" type="search" placeholder="输入单词或中文意思,如: молоко 或 牛奶">
     <div class="search-results" id="search-results"></div>
     <div class="modal-actions">
       <button class="btn btn-light" id="search-close">关闭</button>
@@ -240,10 +260,10 @@
 <!-- 每日学习目标弹窗 -->
 <div class="modal" id="goal-modal" hidden>
   <div class="modal-box">
-    <h3>🎯 每日学习目标</h3>
+    <h3>每日学习目标</h3>
     <label class="modal-label" for="goal-input">每天学习多少个新单词?</label>
     <input id="goal-input" type="number" min="0" max="9999" placeholder="如: 20(填 0 表示不设目标)">
-    <p class="modal-tip">💡 今天标记「认识」的新词计入进度,达成当天自动庆祝 🎉</p>
+    <p class="modal-tip">今天标记「认识」的新词计入进度,达成当天自动庆祝</p>
     <div class="modal-actions">
       <button class="btn btn-light" id="goal-cancel">取消</button>
       <button class="btn btn-primary" id="goal-save">保存目标</button>
@@ -254,15 +274,15 @@
 <!-- 磨耳朵弹窗:自动连续朗读单词 -->
 <div class="modal" id="ear-modal" hidden>
   <div class="modal-box ear-box">
-    <h3>🎧 磨耳朵</h3>
+    <h3>磨耳朵</h3>
     <div class="ear-now">
       <div class="ear-ru" id="ear-ru">—</div>
       <div class="ear-zh" id="ear-zh"></div>
     </div>
     <div class="ear-progress" id="ear-progress">0 / 0</div>
     <div class="ear-controls">
-      <button class="btn btn-primary" id="ear-toggle">▶ 开始</button>
-      <button class="btn btn-light" id="ear-next">⏭ 下一个</button>
+      <button class="btn btn-primary" id="ear-toggle">开始</button>
+      <button class="btn btn-light" id="ear-next">下一个</button>
     </div>
     <div class="ear-settings">
       <label>间隔
@@ -286,7 +306,7 @@
         </select>
       </label>
     </div>
-    <p class="modal-tip">💡 戴上耳机,盲听跟读;暂停后再按「继续」从当前词重播</p>
+    <p class="modal-tip">戴上耳机,盲听跟读;暂停后再按「继续」从当前词重播</p>
     <div class="modal-actions">
       <button class="btn btn-light" id="ear-close">关闭</button>
     </div>
