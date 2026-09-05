@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="midnight">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>言灯 · 让俄语学习像呼吸一样自然</title>
+<meta name="description" content="言灯是一款专为零基础学习者打造的俄语单词记忆工具，艾宾浩斯复习曲线，磨耳朵跟读，打卡成就系统。">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--ease:cubic-bezier(.16,1,.3,1);--font-sans:'SF Pro Display','Geist Sans','Helvetica Neue',system-ui,sans-serif}
+
+/* THEMES */
+[data-theme="midnight"]{
+  --bg:#060a14;--bg-alt:#0c1220;
+  --text:#eef1f7;--text-secondary:#9aa8c2;--text-muted:#5e6e8a;--text-dim:#2e3d56;
+  --primary:#3a8fd4;--primary-bright:#5eadf5;--primary-soft:rgba(58,143,212,.12);
+  --accent:#e05c3a;--accent-soft:rgba(224,92,58,.1);
+  --cyan:#00d4aa;--cyan-soft:rgba(0,212,170,.1);
+  --border:rgba(90,140,220,.1);--border-solid:#1e2d48;
+  --card:rgba(255,255,255,.03);--card-solid:#0c1220;
+  --glass-bg:linear-gradient(135deg,rgba(58,143,212,.07),rgba(255,255,255,.02));
+  --glass-border:rgba(90,140,220,.12);--glass-inner:rgba(90,140,220,.06);
+  --glass-shadow:0 8px 32px rgba(0,0,0,.4),inset 0 1px 0 rgba(90,140,220,.06);
+}
+[data-theme="aurora"]{
+  --bg:#0b0814;--bg-alt:#130e20;
+  --text:#ede9f7;--text-secondary:#9888b8;--text-muted:#5e5080;--text-dim:#2e2448;
+  --primary:#7c5cbf;--primary-bright:#a78bfa;--primary-soft:rgba(124,92,191,.12);
+  --accent:#f472b6;--accent-soft:rgba(244,114,182,.1);
+  --cyan:#22d3ee;--cyan-soft:rgba(34,211,238,.1);
+  --border:rgba(124,92,191,.1);--border-solid:#1e1535;
+  --card:rgba(255,255,255,.03);--card-solid:#130e20;
+  --glass-bg:linear-gradient(135deg,rgba(124,92,191,.08),rgba(34,211,238,.04));
+  --glass-border:rgba(140,110,200,.14);--glass-inner:rgba(140,110,200,.06);
+  --glass-shadow:0 8px 32px rgba(0,0,0,.45),inset 0 1px 0 rgba(140,110,200,.07);
+}
+[data-theme="ember"]{
+  --bg:#0f0e0c;--bg-alt:#181612;
+  --text:#f0ebe0;--text-secondary:#a09080;--text-muted:#685848;--text-dim:#382e24;
+  --primary:#c0823a;--primary-bright:#e0a050;--primary-soft:rgba(192,130,58,.1);
+  --accent:#b5523e;--accent-soft:rgba(181,82,62,.1);
+  --cyan:#5ca08a;--cyan-soft:rgba(92,160,138,.1);
+  --border:rgba(180,140,80,.08);--border-solid:#2a2218;
+  --card:rgba(255,255,255,.03);--card-solid:#181612;
+  --glass-bg:linear-gradient(135deg,rgba(192,130,58,.07),rgba(181,82,62,.04));
+  --glass-border:rgba(180,140,80,.12);--glass-inner:rgba(180,140,80,.06);
+  --glass-shadow:0 8px 32px rgba(0,0,0,.45),inset 0 1px 0 rgba(180,140,80,.05);
+}
+
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:inherit;text-decoration:none}img{display:block;max-width:100%}
+
+/* GRID BG - 更淡更克制 */
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:80px 80px;
+  mask-image:radial-gradient(ellipse 60% 40% at 60% 50%,black,transparent);
+  -webkit-mask-image:radial-gradient(ellipse 60% 40% at 60% 50%,black,transparent);
+  opacity:.6;
+}
+
+/* HERO 区域光晕 — 从右侧向左自然过渡 */
+.hero::before{
+  content:'';position:absolute;
+  width:800px;height:800px;
+  background:radial-gradient(circle,rgba(58,143,212,.1) 0%,transparent 65%);
+  top:50%;right:-100px;transform:translateY(-50%);
+  pointer-events:none;z-index:0;
+}
+[data-theme="aurora"] .hero::before{background:radial-gradient(circle,rgba(124,92,191,.1),transparent 65%)}
+[data-theme="ember"] .hero::before{background:radial-gradient(circle,rgba(192,130,58,.09),transparent 65%)}
+body::after{content:'';position:fixed;inset:0;z-index:9998;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.025) 3px,rgba(0,0,0,.025) 4px);
+}
+
+/* BLOBS — 降低不透明度，更柔和 */
+.bg-blobs{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.blob{position:absolute;border-radius:50%;filter:blur(120px);will-change:transform;opacity:.06}
+.blob--blue{width:900px;height:900px;background:var(--primary);top:-20%;left:-5%;animation:drift 32s ease-in-out infinite alternate}
+.blob--cyan{width:500px;height:500px;background:var(--cyan);top:30%;right:5%;animation:drift 26s ease-in-out infinite alternate-reverse}
+.blob--mid{width:500px;height:500px;background:#1a3050;top:55%;left:50%;animation:drift 28s ease-in-out infinite alternate}
+.blob--red{width:600px;height:600px;background:var(--accent);bottom:-10%;right:10%;animation:drift 36s ease-in-out infinite alternate-reverse}
+@keyframes drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(40px,-30px) scale(1.08)}}
+
+/* GLASS */
+.glass{background:var(--glass-bg);border:1px solid var(--glass-border);box-shadow:var(--glass-shadow);backdrop-filter:blur(24px) saturate(1.6);-webkit-backdrop-filter:blur(24px) saturate(1.6)}
+
+.container{max-width:1100px;margin:0 auto;padding:0 28px;position:relative;z-index:1}
+section{padding:96px 0}
+
+/* THEME SWITCHER */
+.theme-switcher{position:fixed;right:20px;top:50%;transform:translateY(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;padding:10px 8px;border-radius:999px;background:var(--card-solid);border:1px solid var(--glass-border);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 4px 24px rgba(0,0,0,.3)}
+.theme-btn{width:24px;height:24px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .2s var(--ease),border-color .2s;position:relative}
+.theme-btn:hover{transform:scale(1.15)}
+.theme-btn.active{border-color:var(--text-secondary)}
+.theme-btn[data-t="midnight"]{background:linear-gradient(135deg,#3a8fd4,#00d4aa)}
+.theme-btn[data-t="aurora"]{background:linear-gradient(135deg,#7c5cbf,#f472b6)}
+.theme-btn[data-t="ember"]{background:linear-gradient(135deg,#c0823a,#b5523e)}
+.theme-label{position:absolute;right:32px;top:50%;transform:translateY(-50%);white-space:nowrap;font-size:11px;color:var(--text-muted);background:var(--card-solid);padding:3px 8px;border-radius:6px;border:1px solid var(--glass-border);opacity:0;pointer-events:none;transition:opacity .2s}
+.theme-btn:hover .theme-label{opacity:1}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0;height:64px;transition:background .35s var(--ease),box-shadow .35s var(--ease)}
+.nav.scrolled{background:rgba(6,10,20,.7);backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);box-shadow:0 1px 0 var(--glass-border)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;max-width:1100px;margin:0 auto;padding:0 28px;height:100%}
+.nav-brand{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:600;letter-spacing:-.02em}
+.nav-brand img{width:30px;height:30px}
+.nav-links{display:flex;align-items:center;gap:28px}
+.nav-links a{font-size:14px;color:var(--text-muted);transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{padding:8px 20px;border-radius:999px;background:var(--primary);color:#fff;font-size:14px;font-weight:500;transition:opacity .2s,transform .2s var(--ease)}
+.nav-cta:hover{opacity:.88;transform:translateY(-1px)}
+
+/* HERO */
+.hero{min-h-[100dvh];display:flex;align-items:center;padding-top:64px;position:relative;
+  background:radial-gradient(ellipse 55% 60% at 0% 40%,rgba(58,143,212,.06),transparent 70%);
+}
+[data-theme="aurora"] .hero{background:radial-gradient(ellipse 55% 60% at 0% 40%,rgba(124,92,191,.06),transparent 70%)}
+[data-theme="ember"] .hero{background:radial-gradient(ellipse 55% 60% at 0% 40%,rgba(192,130,58,.05),transparent 70%)}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.hero-content{max-width:460px;padding-right:8px}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--primary-bright);margin-bottom:24px;padding:6px 14px;border-radius:999px;background:var(--primary-soft);border:1px solid var(--glass-border)}
+.hero-eyebrow::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--primary-bright);animation:pulse 2.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.8)}}
+.hero h1{font-size:clamp(36px,4.2vw,54px);font-weight:700;line-height:1.08;letter-spacing:-.032em;margin-bottom:24px}
+.hero h1 em{font-style:normal;background:linear-gradient(135deg,var(--primary-bright),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-desc{font-size:16px;line-height:1.8;color:var(--text-secondary);margin-bottom:40px;max-width:380px}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 28px;border-radius:12px;font-size:15px;font-weight:500;transition:all .22s var(--ease)}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 2px 16px rgba(58,143,212,.2),inset 0 1px 0 rgba(255,255,255,.15);position:relative;overflow:hidden}
+[data-theme="aurora"] .btn-primary{background:var(--primary);box-shadow:0 2px 16px rgba(124,92,191,.2),inset 0 1px 0 rgba(255,255,255,.15)}
+[data-theme="ember"] .btn-primary{background:var(--primary);box-shadow:0 2px 16px rgba(192,130,58,.18),inset 0 1px 0 rgba(255,255,255,.15)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 24px rgba(58,143,212,.3),inset 0 1px 0 rgba(255,255,255,.15)}
+[data-theme="aurora"] .btn-primary:hover{box-shadow:0 4px 24px rgba(124,92,191,.3),inset 0 1px 0 rgba(255,255,255,.15)}
+[data-theme="ember"] .btn-primary:hover{box-shadow:0 4px 24px rgba(192,130,58,.28),inset 0 1px 0 rgba(255,255,255,.15)}
+.btn-ghost{background:transparent;border:1px solid var(--glass-border);color:var(--text-secondary)}
+.btn-ghost:hover{border-color:var(--primary);color:var(--primary-bright)}
+.btn svg{width:15px;height:15px}
+
+/* DESKTOP WINDOW MOCKUP — 更稳的姿态 */
+.hero-visual{display:flex;justify-content:center;perspective:1600px}
+.desktop-window{
+  width:580px;border-radius:14px;overflow:hidden;
+  background:var(--bg-alt);
+  border:1px solid var(--glass-border);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.03),
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 30px 80px rgba(0,0,0,.5),
+    0 80px 120px rgba(0,0,0,.25),
+    0 0 200px rgba(58,143,212,.06);
+  transition:transform .8s var(--ease),box-shadow .8s var(--ease);
+  transform:rotateY(-2deg) rotateX(1deg);
+}
+[data-theme="aurora"] .desktop-window{box-shadow:0 0 0 1px rgba(255,255,255,.03),inset 0 1px 0 rgba(255,255,255,.04),0 30px 80px rgba(0,0,0,.5),0 80px 120px rgba(0,0,0,.25),0 0 200px rgba(124,92,191,.06)}
+[data-theme="ember"] .desktop-window{box-shadow:0 0 0 1px rgba(255,255,255,.03),inset 0 1px 0 rgba(255,255,255,.04),0 30px 80px rgba(0,0,0,.5),0 80px 120px rgba(0,0,0,.25),0 0 200px rgba(192,130,58,.05)}
+.desktop-window:hover{transform:rotateY(-1deg) rotateX(.5deg);box-shadow:0 0 0 1px rgba(255,255,255,.04),inset 0 1px 0 rgba(255,255,255,.05),0 35px 90px rgba(0,0,0,.55),0 80px 130px rgba(0,0,0,.28),0 0 240px rgba(58,143,212,.08)}
+[data-theme="aurora"] .desktop-window:hover{box-shadow:0 0 0 1px rgba(255,255,255,.04),inset 0 1px 0 rgba(255,255,255,.05),0 35px 90px rgba(0,0,0,.55),0 80px 130px rgba(0,0,0,.28),0 0 240px rgba(124,92,191,.08)}
+[data-theme="ember"] .desktop-window:hover{box-shadow:0 0 0 1px rgba(255,255,255,.04),inset 0 1px 0 rgba(255,255,255,.05),0 35px 90px rgba(0,0,0,.55),0 80px 130px rgba(0,0,0,.28),0 0 240px rgba(192,130,58,.07)}
+.window-titlebar{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 16px;
+  background:rgba(255,255,255,.03);
+  border-bottom:1px solid var(--glass-border);
+}
+.window-dots{display:flex;gap:6px}
+.window-dot{width:10px;height:10px;border-radius:50%}
+.window-dot--red{background:#ff5f57}
+.window-dot--yellow{background:#febc2e}
+.window-dot--green{background:#28c840}
+.window-title{flex:1;text-align:center;font-size:12px;color:var(--text-muted)}
+.window-body{padding:24px;display:flex;flex-direction:column;gap:16px}
+/* flashcard in window */
+.flashcard{
+  background:linear-gradient(160deg,rgba(58,143,212,.1),rgba(0,212,170,.05),rgba(255,255,255,.02));
+  border:1px solid var(--glass-border);border-radius:16px;padding:32px;text-align:center;
+  position:relative;overflow:hidden;
+}
+[data-theme="aurora"] .flashcard{background:linear-gradient(160deg,rgba(124,92,191,.1),rgba(244,114,182,.05),rgba(255,255,255,.02));border-color:rgba(140,110,200,.15)}
+[data-theme="ember"] .flashcard{background:linear-gradient(160deg,rgba(192,130,58,.1),rgba(181,82,62,.05),rgba(255,255,255,.02));border-color:rgba(180,140,80,.15)}
+.flashcard::before{content:'';position:absolute;top:-40%;left:-20%;width:140%;height:140%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.04),transparent 60%);pointer-events:none}
+.flashcard-ru{font-size:42px;font-weight:700;letter-spacing:-.02em;margin-bottom:8px;text-shadow:0 0 40px rgba(58,143,212,.3)}
+[data-theme="aurora"] .flashcard-ru{text-shadow:0 0 40px rgba(167,139,250,.3)}
+[data-theme="ember"] .flashcard-ru{text-shadow:0 0 40px rgba(192,130,58,.3)}
+.flashcard-zh{font-size:16px;color:var(--text-muted);margin-bottom:12px}
+.flashcard-ex{font-size:12px;color:var(--text-dim);font-style:italic;font-family:Georgia,serif;line-height:1.6;margin-bottom:14px}
+.flashcard-level{display:inline-block;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:var(--primary-soft);color:var(--primary-bright);border:1px solid var(--glass-border)}
+/* window stats */
+.win-stats{display:flex;gap:10px}
+.win-stat{flex:1;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:14px 10px;text-align:center}
+.win-stat-num{font-size:22px;font-weight:700;color:var(--cyan);letter-spacing:-.02em}
+.win-stat-label{font-size:10px;color:var(--text-dim);margin-top:4px;text-transform:uppercase;letter-spacing:.06em}
+/* window progress */
+.win-progress{height:4px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden;display:flex;gap:4px}
+.win-progress-seg{height:100%;border-radius:2px;transition:width .6s var(--ease)}
+.win-progress-seg.done{background:var(--cyan)}
+.win-progress-seg.current{background:var(--primary-bright);animation:pulse-seg 1.5s ease-in-out infinite}
+.win-progress-seg.pending{background:rgba(255,255,255,.08)}
+@keyframes pulse-seg{0%,100%{opacity:1}50%{opacity:.5}}
+/* window nav bar */
+.win-nav{display:flex;gap:6px;padding-top:4px}
+.win-nav-btn{flex:1;padding:8px;border-radius:10px;font-size:12px;font-weight:500;text-align:center;border:1px solid var(--glass-border);background:rgba(255,255,255,.03);color:var(--text-muted);transition:all .2s}
+.win-nav-btn:hover{border-color:var(--primary);color:var(--primary-bright)}
+.win-nav-btn.active{background:var(--primary-soft);border-color:rgba(58,143,212,.3);color:var(--primary-bright)}
+
+/* floating data cards — 更低调 */
+.float-card{
+  position:absolute;padding:10px 14px;border-radius:12px;
+  font-size:12px;font-weight:500;animation:float 6s ease-in-out infinite;
+  white-space:nowrap;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.06);
+}
+.float-card--streak{top:10%;right:-20px;background:rgba(224,92,58,.12);color:var(--accent);box-shadow:0 4px 20px rgba(0,0,0,.2)}
+.float-card--learned{bottom:30%;left:-28px;background:rgba(0,212,170,.1);color:var(--cyan);box-shadow:0 4px 20px rgba(0,0,0,.2)}
+.float-card--quote{top:48%;right:-36px;background:rgba(58,143,212,.1);color:var(--primary-bright);max-width:140px;font-size:11px;line-height:1.5;font-style:italic;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+/* SECTION HEADERS */
+.section-header{text-align:center;margin-bottom:56px}
+.section-header h2{font-size:clamp(24px,3vw,38px);font-weight:700;letter-spacing:-.02em;margin-bottom:14px}
+.section-header p{font-size:16px;color:var(--text-muted);max-width:480px;margin:0 auto;line-height:1.7}
+
+/* INTRO STRIP */
+.intro-strip{padding:56px 0;border-top:1px solid var(--glass-border);border-bottom:1px solid var(--glass-border)}
+.intro-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;text-align:center}
+.intro-num{font-size:32px;font-weight:700;letter-spacing:-.03em;color:var(--primary-bright);margin-bottom:4px}
+.intro-label{font-size:13px;color:var(--text-muted);line-height:1.5}
+
+/* FEATURES */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.feature-card{padding:28px 24px;border-radius:20px;transition:transform .25s var(--ease),box-shadow .25s}
+.feature-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.feature-icon{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;background:var(--primary-soft);border:1px solid var(--glass-border)}
+[data-theme="aurora"] .feature-icon{background:rgba(124,92,191,.12)}
+[data-theme="ember"] .feature-icon{background:rgba(192,130,58,.1)}
+.feature-icon svg{width:20px;height:20px;color:var(--primary-bright)}
+.feature-card h3{font-size:15px;font-weight:600;margin-bottom:7px;letter-spacing:-.01em}
+.feature-card p{font-size:13px;color:var(--text-muted);line-height:1.65}
+
+/* METHOD */
+.method-section{background:var(--bg-alt)}
+.method-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.method-visual{border-radius:20px;overflow:hidden;aspect-ratio:4/3;background:var(--glass-bg);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center;padding:28px}
+.method-visual svg{width:100%;height:100%}
+.method-content h2{font-size:clamp(24px,2.8vw,36px);font-weight:700;letter-spacing:-.02em;margin-bottom:16px;line-height:1.2}
+.method-content>p{font-size:15px;color:var(--text-secondary);line-height:1.75;margin-bottom:32px}
+.method-steps{display:flex;flex-direction:column;gap:16px}
+.method-step{display:flex;gap:14px;align-items:flex-start}
+.step-num{width:28px;height:28px;min-width:28px;border-radius:50%;background:var(--accent-soft);border:1px solid rgba(224,92,58,.2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--accent)}
+.step-text h4{font-size:14px;font-weight:600;margin-bottom:3px}
+.step-text p{font-size:13px;color:var(--text-muted);line-height:1.6}
+
+/* COPY ROW */
+.copy-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.copy-card{padding:28px 24px;border-radius:20px;transition:transform .25s var(--ease)}
+.copy-card:hover{transform:translateY(-2px)}
+.copy-card h3{font-size:16px;font-weight:600;margin-bottom:8px;letter-spacing:-.01em}
+.copy-card p{font-size:14px;color:var(--text-muted);line-height:1.7}
+.copy-card-accent{background:linear-gradient(135deg,rgba(58,143,212,.12),rgba(0,212,170,.06));border:1px solid rgba(58,143,212,.2)}
+[data-theme="aurora"] .copy-card-accent{background:linear-gradient(135deg,rgba(124,92,191,.12),rgba(244,114,182,.06));border-color:rgba(124,92,191,.2)}
+[data-theme="ember"] .copy-card-accent{background:linear-gradient(135deg,rgba(192,130,58,.12),rgba(181,82,62,.06));border-color:rgba(192,130,58,.2)}
+.accent-tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px}
+
+/* TESTIMONIALS */
+.testimonials-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.testimonial-card{padding:26px 22px;border-radius:20px}
+.testimonial-text{font-size:14px;color:var(--text-secondary);line-height:1.75;margin-bottom:16px;font-family:Georgia,'Noto Serif SC',serif;font-style:italic}
+.testimonial-author{display:flex;align-items:center;gap:10px}
+.testimonial-avatar{width:32px;height:32px;border-radius:50%;background:var(--primary-soft);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--primary-bright)}
+.testimonial-name{font-size:13px;font-weight:600}
+.testimonial-role{font-size:12px;color:var(--text-dim)}
+
+/* CTA */
+.cta-section{padding:80px 0}
+.cta-box{border-radius:28px;padding:72px 56px;text-align:center;position:relative;overflow:hidden}
+.cta-box::before{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,var(--primary-soft),transparent 70%);top:-160px;left:50%;transform:translateX(-50%);pointer-events:none}
+.cta-box h2{font-size:clamp(24px,3vw,38px);font-weight:700;letter-spacing:-.02em;margin-bottom:14px;position:relative}
+.cta-box>p{font-size:16px;color:var(--text-muted);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;position:relative;line-height:1.7}
+.cta-box .btn{position:relative}
+
+/* FOOTER */
+.footer{padding:48px 0 36px;border-top:1px solid var(--glass-border)}
+.footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer-brand{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text-muted)}
+.footer-brand img{width:22px;height:22px}
+.footer-links{display:flex;gap:20px}
+.footer-links a{font-size:13px;color:var(--text-muted);transition:color .2s}
+.footer-links a:hover{color:var(--text)}
+.footer-copy{font-size:12px;color:var(--text-dim);width:100%;margin-top:12px;text-align:center}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.delay-1{transition-delay:.08s}.delay-2{transition-delay:.16s}.delay-3{transition-delay:.24s}
+
+@media(max-width:768px){
+  .nav-links{display:none}
+  .hero-grid{grid-template-columns:1fr;text-align:center;gap:40px}
+  .hero-content{max-width:100%}
+  .hero-desc{margin-left:auto;margin-right:auto}
+  .hero-actions{justify-content:center}
+  .intro-grid{grid-template-columns:repeat(2,1fr);gap:20px}
+  .features-grid,.testimonials-grid{grid-template-columns:1fr}
+  .copy-row{grid-template-columns:1fr}
+  .method-grid{grid-template-columns:1fr;gap:36px}
+  .cta-box{padding:48px 24px}
+  .desktop-window{width:100%;max-width:480px;transform:none!important}
+  .desktop-window:hover{transform:none}
+  .float-card{display:none}
+  .theme-switcher{right:12px;gap:6px;padding:8px 6px}
+  .theme-label{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="bg-blobs">
+  <div class="blob blob--blue"></div>
+  <div class="blob blob--cyan"></div>
+  <div class="blob blob--mid"></div>
+  <div class="blob blob--red"></div>
+</div>
+
+<div class="theme-switcher" role="group" aria-label="切换主题">
+  <button class="theme-btn active" data-t="midnight"><span class="theme-label">深空蓝</span></button>
+  <button class="theme-btn" data-t="aurora"><span class="theme-label">极光紫</span></button>
+  <button class="theme-btn" data-t="ember"><span class="theme-label">暮色金</span></button>
+</div>
+
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-brand"><img src="logo.svg" alt=""><span>言灯</span></a>
+    <div class="nav-links">
+      <a href="#features">功能</a><a href="#method">方法</a><a href="#users">用户</a>
+      <a href="#start" class="nav-cta">开始学习</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-content reveal">
+        <div class="hero-eyebrow">零基础友好</div>
+        <h1>让俄语学习<br>像呼吸一样<em>自然</em></h1>
+        <p class="hero-desc">不需要报班，不需要死记硬背。言灯用艾宾浩斯遗忘曲线帮你记住单词，配合磨耳朵跟读，让你在不知不觉中把俄语说得出口。</p>
+        <div class="hero-actions">
+          <a href="index.html" class="btn btn-primary">
+            开始背单词
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+          <a href="#method" class="btn btn-ghost">了解更多</a>
+        </div>
+      </div>
+      <div class="hero-visual reveal delay-2">
+        <div class="desktop-window">
+          <div class="window-titlebar">
+            <div class="window-dots">
+              <span class="window-dot window-dot--red"></span>
+              <span class="window-dot window-dot--yellow"></span>
+              <span class="window-dot window-dot--green"></span>
+            </div>
+            <span class="window-title">言灯 · 背单词</span>
+            <div style="width:52px"></div>
+          </div>
+          <div class="window-body">
+            <div class="flashcard">
+              <div class="flashcard-ru">МОЛОКО</div>
+              <div class="flashcard-zh">牛奶</div>
+              <div class="flashcard-ex">Я пью молоко каждое утро.</div>
+              <span class="flashcard-level">A1 · 基础词汇</span>
+            </div>
+            <div class="win-progress">
+              <span class="win-progress-seg done" style="width:20%"></span>
+              <span class="win-progress-seg done" style="width:20%"></span>
+              <span class="win-progress-seg done" style="width:20%"></span>
+              <span class="win-progress-seg current" style="width:20%"></span>
+              <span class="win-progress-seg pending" style="width:20%"></span>
+            </div>
+            <div class="win-stats">
+              <div class="win-stat"><div class="win-stat-num">47</div><div class="win-stat-label">已掌握</div></div>
+              <div class="win-stat"><div class="win-stat-num">12</div><div class="win-stat-label">连续打卡</div></div>
+              <div class="win-stat"><div class="win-stat-num">A2</div><div class="win-stat-label">当前等级</div></div>
+            </div>
+            <div class="win-nav">
+              <div class="win-nav-btn">上一个</div>
+              <div class="win-nav-btn">不认识</div>
+              <div class="win-nav-btn active">认识</div>
+              <div class="win-nav-btn">下一个</div>
+            </div>
+          </div>
+        </div>
+        <div class="float-card float-card--streak">连续打卡 12 天</div>
+        <div class="float-card float-card--learned">+3 新单词已掌握</div>
+        <div class="float-card float-card--quote">"Я люблю русский язык"</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="intro-strip">
+  <div class="container">
+    <div class="intro-grid reveal">
+      <div class="intro-item"><div class="intro-num">800+</div><div class="intro-label">收录俄语单词<br>覆盖 A1 到 B2</div></div>
+      <div class="intro-item"><div class="intro-num">12</div><div class="intro-label">个真实场景词库<br>生活到商务全覆盖</div></div>
+      <div class="intro-item"><div class="intro-num">30天</div><div class="intro-label">平均达到基础<br>日常交流水平</div></div>
+      <div class="intro-item"><div class="intro-num">0元</div><div class="intro-label">完全免费使用<br>无需注册无广告</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-header reveal">
+      <h2>不只是背单词，而是真正学会</h2>
+      <p>每一个功能都围绕一个目标：让你在最短的时间内，用最省力的方式，真正掌握俄语。</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card glass reveal delay-1">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <h3>艾宾浩斯智能复习</h3><p>系统根据你的记忆情况自动安排复习时间，在快要忘记的时候准时出现，效率是死记硬背的数倍。</p>
+      </div>
+      <div class="feature-card glass reveal delay-2">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div>
+        <h3>磨耳朵 + 跟读练习</h3><p>一键开启自动朗读，通勤路上也能学。跟读模式逐词播放，培养地道的俄语发音。</p>
+      </div>
+      <div class="feature-card glass reveal delay-3">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg></div>
+        <h3>打卡激励体系</h3><p>设定每日目标，记录连续打卡天数。月度进度环让你清楚看到自己的成长轨迹。</p>
+      </div>
+      <div class="feature-card glass reveal delay-1">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+        <h3>分级词库 · 真实例句</h3><p>从 A1 入门到 B2 进阶，每个单词都配有真实语境例句，而非孤立的词义罗列。</p>
+      </div>
+      <div class="feature-card glass reveal delay-2">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
+        <h3>拼写与小测验</h3><p>听音拼写检验听力，小测验即时反馈掌握程度，巩固每一个词汇场景。</p>
+      </div>
+      <div class="feature-card glass reveal delay-3">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <h3>日常用语与语法</h3><p>场景化分类的日常用语，配合简明语法讲解，不只是背单词，更是真正学会俄语。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="method-section" id="method">
+  <div class="container">
+    <div class="method-grid">
+      <div class="method-visual reveal">
+        <svg viewBox="0 0 400 240" fill="none">
+          <line x1="40" y1="200" x2="370" y2="200" stroke="var(--glass-border)" stroke-width="1"/>
+          <line x1="40" y1="200" x2="40" y2="30" stroke="var(--glass-border)" stroke-width="1"/>
+          <text x="40" y="22" font-size="11" fill="var(--text-muted)" font-family="system-ui">记忆保留率</text>
+          <path d="M40,50 C80,48 120,55 160,90 S220,160 270,140 S330,100 370,80" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="5 4" opacity=".45" fill="none"/>
+          <path d="M40,50 C80,48 120,55 160,90 S200,155 210,60 S220,20 260,50 S310,120 350,100 S370,90 370,85" stroke="var(--primary-bright)" stroke-width="2.5" stroke-linecap="round" fill="none" style="stroke-dasharray:900;stroke-dashoffset:900;animation:drawC 3.5s cubic-bezier(.16,1,.3,1) forwards"/>
+          @keyframes drawC{to{stroke-dashoffset:0}}
+          <circle cx="160" cy="90" r="5" fill="var(--primary-bright)" opacity=".85" style="filter:drop-shadow(0 0 6px var(--primary-bright))"/>
+          <circle cx="210" cy="60" r="5" fill="var(--primary-bright)" opacity=".85" style="filter:drop-shadow(0 0 6px var(--primary-bright))"/>
+          <circle cx="260" cy="50" r="5" fill="var(--cyan)" opacity=".85" style="filter:drop-shadow(0 0 6px var(--cyan))"/>
+          <circle cx="350" cy="100" r="5" fill="var(--accent)" opacity=".7"/>
+          <text x="60" y="216" font-size="10" fill="var(--text-dim)" font-family="system-ui">第1天</text>
+          <text x="148" y="216" font-size="10" fill="var(--text-dim)" font-family="system-ui">第2天</text>
+          <text x="248" y="216" font-size="10" fill="var(--text-dim)" font-family="system-ui">第7天</text>
+          <text x="340" y="216" font-size="10" fill="var(--text-dim)" font-family="system-ui">第30天</text>
+          <line x1="250" y1="24" x2="268" y2="24" stroke="var(--primary-bright)" stroke-width="2"/>
+          <text x="273" y="28" font-size="10" fill="var(--text-muted)" font-family="system-ui">使用言灯</text>
+          <line x1="250" y1="38" x2="268" y2="38" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <text x="273" y="42" font-size="10" fill="var(--text-muted)" font-family="system-ui">不复习</text>
+        </svg>
+      </div>
+      <div class="method-content reveal delay-1">
+        <h2>科学记忆，不是死记硬背</h2>
+        <p>人的大脑遗忘是有规律的。言灯基于艾宾浩斯遗忘曲线，在你即将忘记的时刻提醒你复习，让每一次回忆都刚好发生在学习的最佳时机。用科学替代蛮力，用更少的时间获得更牢固的记忆。</p>
+        <div class="method-steps">
+          <div class="method-step"><div class="step-num">1</div><div class="step-text"><h4>选择词库包</h4><p>从 A1 到 B2 分级的俄语词库，按场景分类，覆盖日常生活、旅游、商务等真实语境。</p></div></div>
+          <div class="method-step"><div class="step-num">2</div><div class="step-text"><h4>闪卡学习</h4><p>正面俄文、背面中文，点击翻转查看释义和例句，用「认识 / 不熟悉 / 不认识」标记掌握程度。</p></div></div>
+          <div class="method-step"><div class="step-num">3</div><div class="step-text"><h4>智能复习</h4><p>系统根据你的标记自动计算下次复习时间，越熟的单词间隔越长，效率自然提升。</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding:60px 0">
+  <div class="container">
+    <div class="copy-row reveal">
+      <div class="copy-card glass copy-card-accent">
+        <span class="accent-tag">为什么选择言灯</span>
+        <h3>数据存在你自己的浏览器里</h3>
+        <p>不需要注册账号，不需要联网同步。你的学习进度完全由你掌控，换个设备也能随时继续。</p>
+      </div>
+      <div class="copy-card glass">
+        <h3>专为中文用户设计</h3>
+        <p>所有释义用中文，例句配有翻译，语法讲解符合中国人的学习习惯，没有语言障碍。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="users" style="padding-top:40px">
+  <div class="container">
+    <div class="section-header reveal">
+      <h2>他们已经在用了</h2>
+      <p>来自真实学习者的反馈。</p>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card glass reveal delay-1">
+        <p class="testimonial-text">之前用过不少背单词 App，但俄语真的很难坚持。言灯让我每天只学 15 分钟，三个月下来居然能看懂简单的俄语新闻了。</p>
+        <div class="testimonial-author"><div class="testimonial-avatar">林</div><div class="testimonial-info"><div class="testimonial-name">林同学</div><div class="testimonial-role">大学生 · 自学俄语</div></div></div>
+      </div>
+      <div class="testimonial-card glass reveal delay-2">
+        <p class="testimonial-text">磨耳朵功能太棒了。每天早上通勤时开着，不知不觉就记住了很多单词。现在去俄罗斯旅游基本沟通没问题。</p>
+        <div class="testimonial-author"><div class="testimonial-avatar">陈</div><div class="testimonial-info"><div class="testimonial-name">陈先生</div><div class="testimonial-role">程序员 · 业余学习</div></div></div>
+      </div>
+      <div class="testimonial-card glass reveal delay-3">
+        <p class="testimonial-text">喜欢它的简洁。没有花里胡哨的东西，就是专心帮我把单词记住。打卡火焰让我每天都想点进去看看。</p>
+        <div class="testimonial-author"><div class="testimonial-avatar">周</div><div class="testimonial-info"><div class="testimonial-name">周同学</div><div class="testimonial-role">外语专业 · 备考 B1</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section" id="start">
+  <div class="container">
+    <div class="cta-box glass reveal">
+      <h2>从今天开始，每天 15 分钟</h2>
+      <p>打开就用，无需注册，数据保存在本地。坚持一个月，你能读懂基本的俄语日常表达。</p>
+      <a href="index.html" class="btn btn-primary" style="font-size:15px;padding:14px 32px">
+        进入言灯
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand"><img src="logo.svg" alt=""><span>言灯</span></div>
+      <div class="footer-links"><a href="index.html">背单词</a><a href="phrases.html">日常用语</a><a href="grammar.html">语法</a><a href="checkin.html">打卡</a></div>
+      <div class="footer-copy">言灯 · 学习数据保存在本地浏览器 · 2026</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+const root=document.documentElement;
+const btns=document.querySelectorAll('.theme-btn');
+const saved=localStorage.getItem('yandeng-theme')||'midnight';
+root.setAttribute('data-theme',saved);
+btns.forEach(b=>b.classList.toggle('active',b.dataset.t===saved));
+btns.forEach(btn=>{btn.addEventListener('click',()=>{const t=btn.dataset.t;root.setAttribute('data-theme',t);localStorage.setItem('yandeng-theme',t);btns.forEach(b=>b.classList.toggle('active',b.dataset.t===t))})});
+const nav=document.getElementById('nav');
+let ticking=false;
+window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(()=>{nav.classList.toggle('scrolled',window.scrollY>30);ticking=false});ticking=true}},{passive:true});
+const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:.1,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
