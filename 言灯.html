@@ -1716,6 +1716,23 @@ body.dark .splash { background: linear-gradient(180deg, #14171d, #1b1f26); }
 
 /* 单文件版页内视图 */
 
+/* 重音开关按钮 */
+#stress-toggle { font-size: 12px; padding: 5px 10px; min-width: 64px; }
+#stress-toggle.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+#stress-toggle:not(.active) { color: var(--text-muted); }
+
+/* 纯听力模式 */
+.spell-zh.pure-listen { color: var(--primary); font-weight: 600; }
+#spell-pure-listen.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+/* 键盘快捷键提示 */
+.btn[title]::after { content: attr(title); display: block; font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.card-actions .btn-nav, .card-actions .btn-outline, .card-actions .btn-light,
+.card-actions .btn-soft-danger, .card-actions .btn-warn, .card-actions .btn-success { min-width: 60px; }
+
+/* 错词专项练习 */
+#wrongdrill-ru { font-size: clamp(1.2rem, 3vw + .25rem, 1.5rem); font-weight: 700; text-align: center; margin: 16px 0 8px; }
+
 </style>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2046%2046%22%3E%0A%20%20%3C!--%20%E7%BA%AF%E6%89%81%E5%B9%B3%E5%87%A0%E4%BD%95%EF%BC%9A%E4%BF%84%E6%96%87%E5%AD%97%E6%AF%8D%20%D0%A1%EF%BC%8C%E5%BD%A2%E4%BC%BC%E7%BF%BB%E5%BC%80%E7%9A%84%E4%B9%A6%E9%A1%B5%20--%3E%0A%20%20%3Crect%20width%3D%2246%22%20height%3D%2246%22%20rx%3D%2211%22%20fill%3D%22%23111111%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M32%2014%20C25%2010.5%2C%2013%2012%2C%2011%2020%20C9%2028%2C%2015%2035%2C%2024%2034%20C30%2033.2%2C%2034%2029.5%2C%2034.5%2025%22%0A%20%20%20%20%20%20%20%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%2F%3E%0A%20%20%3C!--%20%E4%B9%A6%E9%A1%B5%E4%B8%AD%E7%BA%BF%20--%3E%0A%20%20%3Cline%20x1%3D%2223%22%20y1%3D%229%22%20x2%3D%2223%22%20y2%3D%2237%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.6%22%2F%3E%0A%20%20%3C!--%20%E4%B8%89%E6%9D%A1%E8%AF%AD%E8%A8%80%E6%B3%A2%E7%BA%B9%20--%3E%0A%20%20%3Cline%20x1%3D%2214%22%20y1%3D%2217%22%20x2%3D%2220%22%20y2%3D%2217%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.5%22%2F%3E%0A%20%20%3Cline%20x1%3D%2212%22%20y1%3D%2223%22%20x2%3D%2220%22%20y2%3D%2223%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.35%22%2F%3E%0A%20%20%3Cline%20x1%3D%2213%22%20y1%3D%2229%22%20x2%3D%2220%22%20y2%3D%2229%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.2%22%2F%3E%0A%3C%2Fsvg%3E">
 
@@ -1884,14 +1901,15 @@ body.dark .splash { background: linear-gradient(180deg, #14171d, #1b1f26); }
         </div>
       </div>
       <div class="card-actions">
-        <button class="btn btn-nav" id="card-prev" title="上一个">
+        <button class="btn btn-nav" id="card-prev" title="上一个 [←]">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <button class="btn btn-outline card-shuffle-btn" id="card-shuffle" title="随机顺序">🔀 随机</button>
-        <button class="btn btn-soft-danger" id="card-new">不认识</button>
-        <button class="btn btn-warn" id="card-familiar">不熟悉</button>
-        <button class="btn btn-success card-main-btn" id="card-known">认识</button>
-        <button class="btn btn-nav" id="card-next" title="下一个">
+        <button class="btn btn-light" id="stress-toggle" title="切换重音显示">重音:开</button>
+        <button class="btn btn-soft-danger" id="card-new">不认识 [1]</button>
+        <button class="btn btn-warn" id="card-familiar">不熟悉 [2]</button>
+        <button class="btn btn-success card-main-btn" id="card-known">认识 [3]</button>
+        <button class="btn btn-nav" id="card-next" title="下一个 [→]">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
@@ -1949,6 +1967,10 @@ body.dark .splash { background: linear-gradient(180deg, #14171d, #1b1f26); }
       <div class="spell-mode-tabs">
         <button class="spell-mode-tab active" id="spell-mode-see"> 看义拼写</button>
         <button class="spell-mode-tab" id="spell-mode-listen">🎧 听音拼写</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+        <button class="btn btn-light btn-sm" id="spell-pure-listen" title="纯听力模式:隐藏中文提示,只听发音拼写">👂 纯听力模式</button>
+        <span class="sub-tip">关闭中文,只听发音</span>
       </div>
       <p id="spell-info">从你学习过的单词中随机抽 10 题进行拼写。</p>
       <button class="btn btn-primary btn-lg" id="spell-begin">开始拼写</button>
@@ -2038,6 +2060,45 @@ body.dark .splash { background: linear-gradient(180deg, #14171d, #1b1f26); }
     <div id="review-view-wrongbook" hidden>
       <p class="sub-tip">测验、拼写答错和复习中忘记的单词都会记在这里,并自动回到复习第 1 轮。点「已纠正」可清零错误次数。</p>
       <div class="book-list" id="wrongbook-list"></div>
+      <div style="margin-top:12px;text-align:center;">
+        <button class="btn btn-primary" id="wrongdrill-begin" title="从错词本抽 8 题集中练习">🎯 错词专项练习 (8 题)</button>
+      </div>
+    </div>
+
+    <!-- 错词专项练习 -->
+    <div id="wrongdrill-start" class="quiz-start" hidden>
+      <p>从错词本中随机抽取单词,集中攻克薄弱环节。</p>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
+        <button class="btn btn-outline" onclick="startWrongDrill(5)">5 题</button>
+        <button class="btn btn-primary" onclick="startWrongDrill(8)">8 题</button>
+        <button class="btn btn-outline" onclick="startWrongDrill(10)">10 题</button>
+      </div>
+    </div>
+    <div id="wrongdrill-run" hidden>
+      <div class="quiz-top">
+        <span id="wrongdrill-qnum">第 1 题</span>
+        <span id="wrongdrill-score">得分:0</span>
+      </div>
+      <div class="spell-question">
+        <button class="speak-btn" id="wrongdrill-speak" title="听发音">🔊</button>
+        <div class="ru-word" id="wrongdrill-ru"></div>
+        <div class="spell-hint" id="wrongdrill-hint"></div>
+      </div>
+      <div class="spell-input-row">
+        <input id="wrongdrill-input" type="text" placeholder="输入单词…" autocomplete="off" spellcheck="false">
+        <button class="btn btn-primary" id="wrongdrill-submit">提交</button>
+      </div>
+      <div class="spell-feedback" id="wrongdrill-feedback"></div>
+      <button class="btn btn-primary" id="wrongdrill-next" hidden>下一题 →</button>
+    </div>
+    <div id="wrongdrill-result" hidden>
+      <div class="result-box">
+        <div class="score-ring"><span id="wrongdrill-result-score">0</span><small>/ ?</small></div>
+        <p class="result-msg" id="wrongdrill-result-msg"></p>
+      </div>
+      <h3>错误回顾</h3>
+      <div class="wrong-list" id="wrongdrill-wrong"></div>
+      <button class="btn btn-primary btn-lg" id="wrongdrill-again">再来一次</button>
     </div>
 
     <!-- 日历 -->
@@ -12623,6 +12684,8 @@ let vocabOrder = 'seq';                // 浏览顺序 seq / rand
 let reviewShuffle = false;             // 复习页是否乱序
 let speakRate = 1;                     // 朗读速度
 let quiz = null;                       // 测验状态 {words, idx, score, wrong, opts}
+let spellPureListen = false;           // 拼写纯听力模式(隐藏中文提示)
+let stressVisible = true;              // 卡片正面是否显示重音符号
 let toastTimer = null;
 let quoteTimer = null;                 // 概览引言轮换定时器
 
@@ -12639,6 +12702,36 @@ function toast(msg) {
   t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ========== Confetti 庆祝动画 ==========
+function launchConfetti() {
+  const colors = ['#f59e0b', '#ef4444', '#15803d', '#1a56db', '#8b5cf6'];
+  for (let i = 0; i < 50; i++) {
+    const conf = document.createElement('div');
+    conf.style.cssText = `
+      position:fixed;z-index:9999;pointer-events:none;
+      width:${Math.random()*8+4}px;height:${Math.random()*8+4}px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      left:${Math.random()*100}vw;top:-10px;
+      border-radius:${Math.random()>0.5?'50%':'0'};
+      animation:confettiFall ${Math.random()*1.5+1.5}s linear forwards;
+    `;
+    document.body.appendChild(conf);
+    setTimeout(() => conf.remove(), 3000);
+  }
+}
+// 注入 confetti 动画
+if (!document.getElementById('confetti-style')) {
+  const style = document.createElement('style');
+  style.id = 'confetti-style';
+  style.textContent = `
+    @keyframes confettiFall {
+      0% { transform: translateY(0) rotate(0deg); opacity:1; }
+      100% { transform: translateY(110vh) rotate(${Math.random()*720}deg); opacity:0; }
+    }
+  `;
+  document.head.appendChild(style);
 }
 
 // ========== 语音朗读 ==========
@@ -12684,10 +12777,13 @@ function loadState() {
     achievements = JSON.parse(localStorage.getItem(pkey('achievements')) || '{}');
     quizLog = JSON.parse(localStorage.getItem(pkey('quiz_log')) || '{}');
     reviewShuffle = localStorage.getItem(pkey('review_shuffle')) === '1';
+    spellPureListen = localStorage.getItem(pkey('spell_pure_listen')) === '1';
+    stressVisible = localStorage.getItem(pkey('stress_visible')) !== '0';
   } catch (e) {
     learned = {}; customWords = []; checkinDates = []; quizBest = null; quizWrong = [];
     newWordDates = {}; wordReview = {}; familiar = {}; dailyGoal = 0; goalCelebrated = ''; reviewLog = {};
     wrongStreak = {}; achievements = {}; quizLog = {}; reviewShuffle = false;
+    spellPureListen = false; stressVisible = true;
   }
 }
 const saveLearned = () => localStorage.setItem(pkey('learned'), JSON.stringify(learned));
@@ -12882,7 +12978,8 @@ function renderCard() {
   if (shuffleBtn) { shuffleBtn.classList.toggle('active', vocabOrder === 'rand'); }
   curWord = filtered[curIdx] || null;
   if (curWord) {
-    $('#card-ru').textContent = curWord.ru;
+    const ruDisplay = stressVisible ? curWord.ru : norm(curWord.ru);
+    $('#card-ru').textContent = ruDisplay;
     $('#card-zh').textContent = curWord.zh;
     $('#card-cat').textContent = curWord.cat + (curWord.level ? ' · ' + curWord.level : '');
     $('#card-known-badge').hidden = !learned[wkey(curWord)];
@@ -13189,6 +13286,7 @@ let spellMode = 'see'; // 'see' 看义拼写 / 'listen' 听音拼写
 
 function setSpellMode(m) {
   spellMode = m;
+  localStorage.setItem(pkey('spell_mode'), m);
   $('#spell-mode-see').classList.toggle('active', m === 'see');
   $('#spell-mode-listen').classList.toggle('active', m === 'listen');
   updateSpellInfo();
@@ -13219,12 +13317,25 @@ function showSpellQuestion() {
   $('#spell-qnum').textContent = '第 ' + (spell.idx + 1) + ' 题 / 共 ' + spell.words.length + ' 题';
   $('#spell-progress').textContent = (spell.idx + 1) + ' / ' + spell.words.length;
   if (spellMode === 'listen') {
-    $('#spell-zh').textContent = '🎧 听发音,拼出你听到的单词';
+    if (spellPureListen) {
+      $('#spell-zh').textContent = '🎧 听发音,拼出你听到的单词';
+      $('#spell-zh').classList.add('pure-listen');
+    } else {
+      $('#spell-zh').textContent = '🎧 听发音,拼出你听到的单词';
+      $('#spell-zh').classList.remove('pure-listen');
+    }
     $('#spell-hint').textContent = '提示:重音符号 ́ 不用打;没听清点左上角 🔊 再听一遍';
-    speak(w.ru); // 自动播放发音
+    speak(w.ru);
   } else {
-    $('#spell-zh').textContent = w.zh;
+    if (spellPureListen) {
+      $('#spell-zh').textContent = '🎧 听发音,拼出你听到的单词';
+      $('#spell-zh').classList.add('pure-listen');
+    } else {
+      $('#spell-zh').textContent = w.zh;
+      $('#spell-zh').classList.remove('pure-listen');
+    }
     $('#spell-hint').textContent = '提示:重音符号 ́ 不用打,例如 привет 也算对';
+    speak(w.ru); // 看义模式下也播放发音辅助
   }
   $('#spell-input').value = '';
   $('#spell-input').disabled = false;
@@ -13444,7 +13555,8 @@ function renderDueView() {
   reviewWord = dueQueue[reviewIdx] || null;
   if (reviewWord) {
     const r = reviewStateOf(reviewWord);
-    $('#review-ru').textContent = reviewWord.ru;
+    const ruDisplay = stressVisible ? reviewWord.ru : norm(reviewWord.ru);
+    $('#review-ru').textContent = ruDisplay;
     $('#review-zh').textContent = reviewWord.zh;
     const kk = wkey(reviewWord);
     $('#review-cat').textContent = reviewWord.cat + (reviewWord.level ? ' · ' + reviewWord.level : '') + (r ? ' · 第' + (r.stage + 1) + ' 轮复习' : '')
@@ -13964,6 +14076,7 @@ function updateGoalUI() {
     goalCelebrated = dstr(new Date());
     localStorage.setItem(pkey('goal_celebrated'), goalCelebrated);
     toast('🎉 今日目标达成!已学 ' + n + ' 个新词,超额完成 ' + (n - dailyGoal) + ' 个!');
+    launchConfetti();
     checkAchievements(); // 成就:目标达成
   }
 }
@@ -14219,6 +14332,20 @@ on('#spell-input', 'keydown', (e) => {
 on('#spell-next', 'click', spellNext);
 on('#spell-again', 'click', startSpell);
 on('#spell-speak', 'click', () => { if (spell) speak(spell.words[spell.idx].ru); });
+// 拼写纯听力模式开关
+on('#spell-pure-listen', 'click', toggleSpellPureListen);
+// 错词专项练习
+on('#wrongdrill-begin', 'click', () => startWrongDrill(8));
+on('#wrongdrill-input', 'keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (!$('#wrongdrill-next').hidden) wrongDrillNext(); else submitWrongDrill();
+  }
+});
+on('#wrongdrill-submit', 'click', submitWrongDrill);
+on('#wrongdrill-next', 'click', wrongDrillNext);
+on('#wrongdrill-again', 'click', () => startWrongDrill(8));
+on('#wrongdrill-speak', 'click', () => { if (wrongDrill) speak(wrongDrill.words[wrongDrill.idx].ru); });
 on('#review-card', 'click', (e) => {
   if (e.target.closest('.speak-btn, .example-item')) return;
   if (reviewWord) $('#review-card').classList.toggle('flipped');
@@ -14242,6 +14369,7 @@ on('#review-shuffle', 'click', () => {
   renderDueView();
   toast(reviewShuffle ? '已切换为随机顺序 🔀' : '已切换为顺序复习');
 });
+on('#stress-toggle', 'click', toggleStress);
 on('#quiz-next', 'click', () => {
   quiz.idx++;
   if (quiz.idx < quiz.words.length) showQuizQuestion(); else finishQuiz();
@@ -14341,11 +14469,149 @@ on('#ear-toggle', 'click', earToggle);
 on('#ear-next', 'click', earNext);
 on('#ear-close', 'click', closeEar);
 
+// ========== 重音开关 ==========
+function toggleStress() {
+  stressVisible = !stressVisible;
+  localStorage.setItem(pkey('stress_visible'), stressVisible ? '1' : '0');
+  const btn = $('#stress-toggle');
+  if (btn) btn.classList.toggle('active', stressVisible);
+  const label = btn ? btn.querySelector('.stress-label') : null;
+  if (label) label.textContent = stressVisible ? '重音:开' : '重音:关';
+  if (curWord) renderCard();
+  if (reviewWord) renderDueView();
+}
+
+// ========== 拼写纯听力模式开关 ==========
+function toggleSpellPureListen() {
+  spellPureListen = !spellPureListen;
+  localStorage.setItem(pkey('spell_pure_listen'), spellPureListen ? '1' : '0');
+  const btn = $('#spell-pure-listen');
+  if (btn) btn.classList.toggle('active', spellPureListen);
+  if (spell) showSpellQuestion(); // 实时刷新当前题
+}
+
+// ========== 错词专项练习 ==========
+let wrongDrill = null; // {words, idx, score, wrong}
+function startWrongDrill(count) {
+  const pool = wrongBookList();
+  if (pool.length < 3) { toast('错词太少,先多练几轮吧'); return; }
+  const n = Math.min(count || 8, pool.length);
+  shuffle(pool);
+  wrongDrill = { words: pool.slice(0, n), idx: 0, score: 0, wrong: [] };
+  $('#wrongdrill-start').hidden = true;
+  $('#wrongdrill-run').hidden = false;
+  $('#wrongdrill-result').hidden = true;
+  showWrongDrillQuestion();
+}
+function showWrongDrillQuestion() {
+  const w = wrongDrill.words[wrongDrill.idx];
+  $('#wrongdrill-qnum').textContent = '第 ' + (wrongDrill.idx + 1) + ' 题 / 共 ' + wrongDrill.words.length + ' 题';
+  $('#wrongdrill-score').textContent = '得分:' + wrongDrill.score;
+  $('#wrongdrill-ru').textContent = w.ru;
+  $('#wrongdrill-hint').innerHTML = '<span class="book-zh">' + esc(w.zh) + '</span>' + (w.note ? ' <span class="sub-tip">' + esc(w.note) + '</span>' : '');
+  $('#wrongdrill-input').value = '';
+  $('#wrongdrill-input').disabled = false;
+  $('#wrongdrill-submit').disabled = false;
+  $('#wrongdrill-feedback').innerHTML = '';
+  $('#wrongdrill-feedback').className = 'spell-feedback';
+  $('#wrongdrill-next').hidden = true;
+  $('#wrongdrill-input').focus();
+  speak(w.ru);
+}
+function submitWrongDrill() {
+  if (!wrongDrill) return;
+  const w = wrongDrill.words[wrongDrill.idx];
+  const ans = norm($('#wrongdrill-input').value);
+  if (!ans) { toast('先输入答案再提交'); return; }
+  const fb = $('#wrongdrill-feedback');
+  if (ans === norm(w.ru)) {
+    wrongDrill.score++;
+    fb.className = 'spell-feedback ok';
+    fb.innerHTML = '✓ 正确!';
+  } else {
+    wrongDrill.wrong.push(w);
+    fb.className = 'spell-feedback no';
+    fb.innerHTML = '✗ 正确答案:<span class="spell-correct-word">' + esc(w.ru) + '</span>(' + esc(w.zh) + ')';
+  }
+  $('#wrongdrill-input').disabled = true;
+  $('#wrongdrill-submit').disabled = true;
+  $('#wrongdrill-next').hidden = false;
+}
+function wrongDrillNext() {
+  wrongDrill.idx++;
+  if (wrongDrill.idx >= wrongDrill.words.length) finishWrongDrill();
+  else showWrongDrillQuestion();
+}
+function finishWrongDrill() {
+  $('#wrongdrill-run').hidden = true;
+  $('#wrongdrill-result').hidden = false;
+  const total = wrongDrill.words.length, score = wrongDrill.score;
+  $('#wrongdrill-result-score').textContent = score;
+  const pct = Math.round(score / total * 100);
+  $('#wrongdrill-result-msg').textContent = pct >= 90 ? '太棒了!错词基本攻克!' : pct >= 70 ? '不错,继续加油!' : '还需要多练';
+  const box = $('#wrongdrill-wrong');
+  box.innerHTML = wrongDrill.wrong.length
+    ? wrongDrill.wrong.map((w, i) =>
+        '<div class="wrong-item fade-item" style="animation-delay:' + (i * 50) + 'ms"><span class="wrong-ru">' + esc(w.ru) + '</span><span class="wrong-zh">' + esc(w.zh) + '</span></div>').join('')
+    : '<p class="no-wrong">全部答对!</p>';
+  // 记录到周报
+  const qd = dstr(new Date());
+  if (!quizLog[qd]) quizLog[qd] = { total: 0, correct: 0, count: 0 };
+  quizLog[qd].total += total;
+  quizLog[qd].correct += score;
+  quizLog[qd].count += 1;
+  saveQuizLog();
+  toast('错词练习完成!对了 ' + score + '/' + total);
+}
+function wrongBookList() {
+  return allWords().filter((w) => (reviewStateOf(w)?.wrong || 0) > 0 || quizWrong.includes(wkey(w)));
+}
+
 document.addEventListener('keydown', (e) => {
+  // Ctrl+K → 打开搜索
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    openSearch();
+    return;
+  }
   if (e.key !== 'Escape') return;
   ['#search-modal', '#add-modal', '#goal-modal'].forEach((s) => { const m = $(s); if (m && !m.hidden) m.hidden = true; });
   const em = $('#ear-modal');
   if (em && !em.hidden) closeEar();
+});
+
+// ========== 键盘快捷键 ==========
+// 背单词页: Space翻卡, ←/→翻页, 1=不认识 2=模糊 3=认识
+// 复习页: 同上, + Enter提交拼写答案
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const key = e.key;
+  // 背单词页快捷键
+  if (PAGE === 'home' && curWord) {
+    if (key === ' ' || key === 'Enter') { e.preventDefault(); $('#flashcard').classList.toggle('flipped'); }
+    else if (key === 'ArrowLeft')  { e.preventDefault(); goNext(-1); }
+    else if (key === 'ArrowRight') { e.preventDefault(); goNext(1); }
+    else if (key === '1') { e.preventDefault(); markNew(); }
+    else if (key === '2') { e.preventDefault(); markFamiliar(); }
+    else if (key === '3') { e.preventDefault(); markKnown(); }
+  }
+  // 复习页快捷键
+  else if (PAGE === 'review' && reviewWord && reviewTab === 'due') {
+    if (key === ' ' || key === 'Enter') { e.preventDefault(); $('#review-card').classList.toggle('flipped'); }
+    else if (key === 'ArrowLeft')  { e.preventDefault(); reviewNext(-1); }
+    else if (key === 'ArrowRight') { e.preventDefault(); reviewNext(1); }
+    else if (key === '1') { e.preventDefault(); reviewStillNew(); }
+    else if (key === '3') { e.preventDefault(); reviewKnown(); }
+  }
+  // 拼写页: Enter提交, →下一题
+  else if (PAGE === 'spell' && spell && !$('#spell-run').hidden) {
+    if (key === 'Enter' && !$('#spell-input').disabled) {
+      e.preventDefault(); submitSpell();
+    } else if (key === 'ArrowRight' || (key === 'Enter' && $('#spell-next') && !$('#spell-next').hidden)) {
+      e.preventDefault(); spellNext();
+    }
+  }
 });
 on('#export-btn', 'click', (e) => { e.preventDefault(); exportData(); });
 on('#import-btn', 'click', (e) => { e.preventDefault(); $('#import-file').click(); });

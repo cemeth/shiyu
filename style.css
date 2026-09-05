@@ -1708,3 +1708,20 @@ body.dark .splash { background: linear-gradient(180deg, #14171d, #1b1f26); }
 .spell-mode-tab.active { background: var(--text); border-color: var(--text); color: var(--bg); }
 
 /* 单文件版页内视图 */
+
+/* 重音开关按钮 */
+#stress-toggle { font-size: 12px; padding: 5px 10px; min-width: 64px; }
+#stress-toggle.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+#stress-toggle:not(.active) { color: var(--text-muted); }
+
+/* 纯听力模式 */
+.spell-zh.pure-listen { color: var(--primary); font-weight: 600; }
+#spell-pure-listen.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+/* 键盘快捷键提示 */
+.btn[title]::after { content: attr(title); display: block; font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.card-actions .btn-nav, .card-actions .btn-outline, .card-actions .btn-light,
+.card-actions .btn-soft-danger, .card-actions .btn-warn, .card-actions .btn-success { min-width: 60px; }
+
+/* 错词专项练习 */
+#wrongdrill-ru { font-size: clamp(1.2rem, 3vw + .25rem, 1.5rem); font-weight: 700; text-align: center; margin: 16px 0 8px; }
