@@ -1,13 +1,31 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>言灯 · 背单词</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" type="image/svg+xml" href="logo.svg">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>言灯 · 让俄语学习像呼吸一样自然</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<style>
+/* ===== SPA 导航 ===== */
+.spa-nav{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);padding:0 16px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.spa-nav-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:0;height:48px}
+.spa-logo{display:flex;align-items:center;gap:8px;flex-shrink:0;text-decoration:none;color:var(--text)}
+.spa-logo svg{width:28px;height:28px}
+.spa-logo-name{font-size:15px;font-weight:700;letter-spacing:.02em}
+.spa-tabs{display:flex;align-items:center;gap:2px;margin-left:16px;flex-shrink:1;overflow-x:auto}
+.spa-tab{padding:6px 12px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;white-space:nowrap;transition:all .2s ease;text-decoration:none;border:none;background:none}
+.spa-tab:hover{color:var(--text);background:var(--bg-elevated)}
+.spa-tab.active{color:var(--primary);background:var(--primary-light);font-weight:600}
+.spa-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;padding-left:8px}
+.spa-panel{display:none;animation:panelIn .3s ease}
+.spa-panel.active{display:block}
+@keyframes panelIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:640px){.spa-logo-name{display:none}.spa-tab{padding:6px 10px;font-size:12px}}
+</style>
 </head>
 <body data-page="home">
+
 <!-- 开场动画 -->
 <div class="splash" id="splash">
   <div class="splash-logo">
@@ -24,21 +42,33 @@
   <div class="splash-tag">背单词 · 口语 · 日常用语 · 语法 · 打卡</div>
   <div class="splash-hint">点击任意处跳过</div>
 </div>
-<header class="site-header">
-  <div class="header-inner">
-    <div class="brand">
-      <a href="index.html" class="brand-logo" title="返回首页"><svg viewBox="0 0 46 46" width="46" height="46" aria-hidden="true"><path d="M22.7 16.2 C19.3 13.7 14.4 12.7 9.6 13.3 L9.6 32 C14.4 32.6 19.3 31.6 22.7 29.1 Z" fill="#fff" opacity=".92"/><path d="M23.3 16.2 C26.7 13.7 31.6 12.7 36.4 13.3 L36.4 32 C31.6 32.6 26.7 31.6 23.3 29.1 Z" fill="#fff"/><rect x="22.1" y="8.2" width="1.8" height="6" rx=".9" fill="#fff"/><rect x="17.5" y="10.8" width="1.8" height="3.4" rx=".9" fill="#fff" opacity=".78"/><rect x="26.7" y="10.8" width="1.8" height="3.4" rx=".9" fill="#fff" opacity=".78"/></svg></a>
-      <div class="brand-text">
-        <h1>言灯</h1>
-        <p>背单词 · 口语 · 日常用语 · 语法 · 打卡</p>
-      </div>
+
+<!-- 顶部导航 -->
+<nav class="spa-nav">
+  <div class="spa-nav-inner">
+    <a href="#home" class="spa-logo" aria-label="言灯首页">
+      <svg viewBox="0 0 46 46" width="28" height="28" aria-hidden="true">
+        <path d="M22.7 16.2 C19.3 13.7 14.4 12.7 9.6 13.3 L9.6 32 C14.4 32.6 19.3 31.6 22.7 29.1 Z" fill="var(--primary)" opacity=".9"/>
+        <path d="M23.3 16.2 C26.7 13.7 31.6 12.7 36.4 13.3 L36.4 32 C31.6 32.6 26.7 31.6 23.3 29.1 Z" fill="var(--accent)"/>
+      </svg>
+      <span class="spa-logo-name">言灯</span>
+    </a>
+    <div class="spa-tabs" role="tablist">
+      <button class="spa-tab active" data-target="home" role="tab" aria-selected="true">背单词</button>
+      <button class="spa-tab" data-target="quiz" role="tab" aria-selected="false">小测验</button>
+      <button class="spa-tab" data-target="spell" role="tab" aria-selected="false">拼写</button>
+      <button class="spa-tab" data-target="review" role="tab" aria-selected="false">复习</button>
+      <button class="spa-tab" data-target="speak" role="tab" aria-selected="false">口语</button>
+      <button class="spa-tab" data-target="phrases" role="tab" aria-selected="false">日常用语</button>
+      <button class="spa-tab" data-target="grammar" role="tab" aria-selected="false">语法</button>
+      <button class="spa-tab" data-target="checkin" role="tab" aria-selected="false">打卡</button>
     </div>
-    <div class="header-right">
-      <button id="search-btn" class="theme-toggle" title="查词搜索">
+    <div class="spa-right">
+      <button id="search-btn" class="theme-toggle" title="查词搜索" aria-label="查词">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </button>
       <div class="theme-wrap">
-        <button id="theme-toggle" class="theme-toggle" title="主题配色与深色模式">
+        <button id="theme-toggle" class="theme-toggle" title="主题配色与深色模式" aria-label="切换主题">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20"/></svg>
         </button>
         <div class="theme-panel" id="theme-panel">
@@ -51,24 +81,15 @@
           <button class="theme-dark-btn" id="theme-dark-btn">深色模式: 关</button>
         </div>
       </div>
-      <select id="lang-select" class="lang-select" title="选择语言"></select>
+      <select id="lang-select" class="lang-select" title="选择语言" aria-label="选择语言"></select>
     </div>
   </div>
-    <nav class="tabs">
-    <a class="tab active" href="index.html">背单词</a>
-    <a class="tab" href="quiz.html">小测验</a>
-    <a class="tab" href="spell.html">拼写</a>
-    <a class="tab" href="review.html">复习</a>
-    <a class="tab" href="speak.html">口语</a>
-    <a class="tab" href="phrases.html">日常用语</a>
-    <a class="tab" href="grammar.html" data-tab="grammar">语法</a>
-    <a class="tab" href="checkin.html">打卡</a>
-    </nav>
-</header>
+</nav>
 
 <main class="container">
 
-  <!-- 概览 -->
+<!-- ===== 首页：概览 + 背单词 ===== -->
+<section class="spa-panel active" id="panel-home">
   <section class="hero reveal">
     <div class="hero-main">
       <h2 id="hero-greet">你好!</h2>
@@ -90,8 +111,7 @@
     </div>
   </section>
 
-  <!-- 每日一词 -->
-  <section class="tab-panel active reveal">
+  <section class="tab-panel reveal">
     <div class="panel-head">
       <h2>每日一词</h2>
       <div style="display:flex;align-items:center;gap:10px;">
@@ -115,8 +135,7 @@
     </div>
   </section>
 
-  <!-- 背单词 -->
-  <section class="tab-panel active reveal">
+  <section class="tab-panel reveal">
     <div class="panel-head">
       <h2>背单词</h2>
       <div class="panel-head-right">
@@ -125,24 +144,15 @@
       </div>
     </div>
     <div class="pack-tabs" id="pack-tabs"></div>
-
-    <!-- 词库包选择面板:点入某个词库包后才显示单词 -->
     <div class="pack-gate" id="pack-gate">
       <p class="sub-tip">选择一个词库包开始学习</p>
       <div class="pack-gate-grid" id="pack-gate-grid"></div>
     </div>
-
-    <!-- 单词学习区(进入词库包后展开) -->
     <div id="vocab-area" hidden>
       <div class="controls">
         <select id="vocab-level" title="按等级筛选">
           <option value="">全部等级</option>
-          <option>A1</option>
-          <option>A2</option>
-          <option>B1</option>
-          <option>B2</option>
-          <option>C1</option>
-          <option>C2</option>
+          <option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option><option>C2</option>
         </select>
         <input id="vocab-search" type="search" placeholder="搜索单词...">
         <select id="vocab-order" title="浏览顺序">
@@ -195,6 +205,453 @@
       </div>
     </div>
   </section>
+</section>
+
+<!-- ===== 小测验 ===== -->
+<section class="spa-panel" id="panel-quiz">
+  <div class="panel-head"><h2>小测验</h2><div class="stats">历史最高:<b id="quiz-best">--</b> 分</div></div>
+  <div id="quiz-start" class="quiz-start">
+    <p id="quiz-info">测验从你学习过的单词中随机抽 10 题。</p>
+    <button class="btn btn-primary btn-lg" id="quiz-begin">开始测验</button>
+  </div>
+  <div id="quiz-run" hidden>
+    <div class="quiz-top"><span id="quiz-qnum">第 1 题</span><span id="quiz-score">得分:0</span></div>
+    <div class="quiz-question" id="quiz-q"></div>
+    <div class="quiz-options" id="quiz-opts"></div>
+    <button class="btn btn-primary" id="quiz-next" hidden>下一题 →</button>
+  </div>
+  <div id="quiz-result" hidden>
+    <div class="result-box">
+      <div class="score-ring">
+        <svg viewBox="0 0 116 116"><circle class="ring-bg" cx="58" cy="58" r="50"/><circle class="ring-fill" id="result-ring-fill" cx="58" cy="58" r="50" stroke-dasharray="314" stroke-dashoffset="314"/></svg>
+        <div class="ring-text"><span class="ring-score" id="result-score">0</span><span class="ring-total" id="result-total">/ 10</span></div>
+      </div>
+      <p class="result-msg" id="result-msg"></p>
+    </div>
+    <h3>错题回顾</h3>
+    <div class="wrong-list" id="quiz-wrong"></div>
+    <button class="btn btn-primary btn-lg" id="quiz-again">再来一次</button>
+  </div>
+</section>
+
+<!-- ===== 拼写 ===== -->
+<section class="spa-panel" id="panel-spell">
+  <div class="panel-head"><h2>键盘拼写</h2><div class="stats">看中文,拼单词,练就「听写式」记忆</div></div>
+  <div id="spell-start" class="quiz-start">
+    <div class="spell-mode-tabs">
+      <button class="spell-mode-tab active" id="spell-mode-see">看义拼写</button>
+      <button class="spell-mode-tab" id="spell-mode-listen">🎧 听音拼写</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+      <button class="btn btn-light btn-sm" id="spell-pure-listen" title="纯听力模式:隐藏中文提示,只听发音拼写">👂 纯听力模式</button>
+      <span class="sub-tip">关闭中文,只听发音</span>
+    </div>
+    <p id="spell-info">从你学习过的单词中随机抽 10 题进行拼写。</p>
+    <button class="btn btn-primary btn-lg" id="spell-begin">开始拼写</button>
+  </div>
+  <div id="spell-run" hidden>
+    <div class="quiz-top"><span id="spell-qnum">第 1 题</span><span id="spell-progress">1 / 10</span></div>
+    <div class="spell-question">
+      <button class="speak-btn" id="spell-speak" title="听发音提示">🔊</button>
+      <div class="spell-zh" id="spell-zh"></div>
+      <div class="spell-hint" id="spell-hint">提示:重音符号 ́ 不用打,例如 привет 也算对</div>
+    </div>
+    <div class="spell-input-row">
+      <input id="spell-input" type="text" placeholder="在这里输入单词…" autocomplete="off" spellcheck="false">
+      <button class="btn btn-primary" id="spell-submit">提交</button>
+    </div>
+    <div class="spell-feedback" id="spell-feedback"></div>
+    <button class="btn btn-primary" id="spell-next" hidden>下一题 →</button>
+  </div>
+  <div id="spell-result" hidden>
+    <div class="result-box">
+      <div class="score-ring">
+        <svg viewBox="0 0 116 116"><circle class="ring-bg" cx="58" cy="58" r="50"/><circle class="ring-fill" id="spell-ring-fill" cx="58" cy="58" r="50" stroke-dasharray="314" stroke-dashoffset="314"/></svg>
+        <div class="ring-text"><span class="ring-score" id="spell-result-score">0</span><span class="ring-total" id="spell-result-total">/ 10</span></div>
+      </div>
+      <p class="result-msg" id="spell-result-msg"></p>
+    </div>
+    <h3>拼错回顾</h3>
+    <div class="wrong-list" id="spell-wrong"></div>
+    <button class="btn btn-primary btn-lg" id="spell-again">再来一次</button>
+  </div>
+</section>
+
+<!-- ===== 复习 ===== -->
+<section class="spa-panel" id="panel-review">
+  <div class="panel-head">
+    <h2>复习</h2>
+    <div class="stats">今日待复习 <b id="review-due-count">0</b> · 已掌握 <b id="review-mastered-count">0</b> · 错词 <b id="review-wrong-count">0</b></div>
+  </div>
+  <p class="sub-tip">按艾宾浩斯记忆曲线安排复习:学习后第 <b>1、2、4、7、15、30 天</b>各复习一次,共 6 轮,之后自动进入「已掌握」。</p>
+  <div class="review-tabs">
+    <button class="review-tab active" data-rtab="due">📅 今日复习</button>
+    <button class="review-tab" data-rtab="newbook">📖 生词本</button>
+    <button class="review-tab" data-rtab="wrongbook">❌ 错词本</button>
+    <button class="review-tab" data-rtab="calendar">🗓️ 日历</button>
+  </div>
+  <div id="review-view-due">
+    <div id="review-empty" class="quiz-start" hidden>
+      <p>🎉 今天没有到期的复习任务!新学的单词明天就会按计划出现在这里。</p>
+    </div>
+    <div id="review-run">
+      <div id="review-phase-dots" class="phase-dots"></div>
+      <div class="flashcard" id="review-card">
+        <div class="flashcard-inner">
+          <div class="flashcard-face flashcard-front">
+            <button class="speak-btn" id="review-speak" title="听发音">🔊</button>
+            <div class="ru-word" id="review-ru">—</div>
+            <div class="hint">点击卡片查看意思</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="zh-word" id="review-zh">—</div>
+            <div class="cat-tag" id="review-cat"></div>
+            <div class="card-note" id="review-note" hidden></div>
+            <div class="card-examples" id="review-examples"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-light" id="review-prev">← 上一个</button>
+        <button class="btn btn-outline review-shuffle-btn" id="review-shuffle" title="随机顺序">🔀 随机</button>
+        <button class="btn btn-danger" id="review-new">😕 忘了,重新学</button>
+        <button class="btn btn-success" id="review-known">😊 记住了,下一轮</button>
+        <button class="btn btn-light" id="review-next">下一个 →</button>
+      </div>
+      <p class="progress-text" id="review-progress"></p>
+    </div>
+  </div>
+  <div id="review-view-newbook" hidden>
+    <p class="sub-tip">记录你正在学习的单词:学习日期、复习阶段、下次复习时间。标记「不熟悉」的词带 🤔 模糊标签,复习时优先出现。</p>
+    <div class="book-list" id="newbook-list"></div>
+  </div>
+  <div id="review-view-wrongbook" hidden>
+    <p class="sub-tip">测验、拼写答错和复习中忘记的单词都会记在这里,并自动回到复习第 1 轮。点「已纠正」可清零错误次数。</p>
+    <div class="book-list" id="wrongbook-list"></div>
+    <div style="margin-top:12px;text-align:center;">
+      <button class="btn btn-primary" id="wrongdrill-begin" title="从错词本抽 8 题集中练习">🎯 错词专项练习 (8 题)</button>
+    </div>
+  </div>
+  <div id="wrongdrill-start" class="quiz-start" hidden>
+    <p>从错词本中随机抽取单词,集中攻克薄弱环节。</p>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
+      <button class="btn btn-outline" onclick="startWrongDrill(5)">5 题</button>
+      <button class="btn btn-primary" onclick="startWrongDrill(8)">8 题</button>
+      <button class="btn btn-outline" onclick="startWrongDrill(10)">10 题</button>
+    </div>
+  </div>
+  <div id="wrongdrill-run" hidden>
+    <div class="quiz-top"><span id="wrongdrill-qnum">第 1 题</span><span id="wrongdrill-score">得分:0</span></div>
+    <div class="spell-question">
+      <button class="speak-btn" id="wrongdrill-speak" title="听发音">🔊</button>
+      <div class="ru-word" id="wrongdrill-ru"></div>
+      <div class="spell-hint" id="wrongdrill-hint"></div>
+    </div>
+    <div class="spell-input-row">
+      <input id="wrongdrill-input" type="text" placeholder="输入单词…" autocomplete="off" spellcheck="false">
+      <button class="btn btn-primary" id="wrongdrill-submit">提交</button>
+    </div>
+    <div class="spell-feedback" id="wrongdrill-feedback"></div>
+    <button class="btn btn-primary" id="wrongdrill-next" hidden>下一题 →</button>
+  </div>
+  <div id="wrongdrill-result" hidden>
+    <div class="result-box">
+      <div class="score-ring">
+        <svg viewBox="0 0 116 116"><circle class="ring-bg" cx="58" cy="58" r="50"/><circle class="ring-fill" id="wrongdrill-ring-fill" cx="58" cy="58" r="50" stroke-dasharray="314" stroke-dashoffset="314"/></svg>
+        <div class="ring-text"><span class="ring-score" id="wrongdrill-result-score">0</span><span class="ring-total" id="wrongdrill-result-total">/?</span></div>
+      </div>
+      <p class="result-msg" id="wrongdrill-result-msg"></p>
+    </div>
+    <h3>错误回顾</h3>
+    <div class="wrong-list" id="wrongdrill-wrong"></div>
+    <button class="btn btn-primary btn-lg" id="wrongdrill-again">再来一次</button>
+  </div>
+  <div id="review-view-calendar" hidden>
+    <p class="sub-tip">生词日历:每天新学(标记「认识」)的单词数;复习日历:每天到期的复习任务数(按艾宾浩斯计划)。</p>
+    <div class="cal-duo">
+      <div class="cal-col"><h3 class="cal-title">🌱 生词日历</h3><div class="calendar" id="newword-calendar"></div></div>
+      <div class="cal-col"><h3 class="cal-title">📅 复习日历</h3><div class="calendar" id="review-calendar"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 口语 ===== -->
+<section class="spa-panel" id="panel-speak">
+  <div class="panel-head"><h2>口语练习</h2></div>
+  <div id="stress-panel" data-ru-only>
+    <h3 class="section-label">重音练习</h3>
+    <p class="sub-tip">听发音,选出重音在第几个音节。重音是俄语的灵魂。</p>
+    <div id="stress-start" class="quiz-start">
+      <p id="stress-info">从你学习过的单词中抽 10 个练重音。</p>
+      <button class="btn btn-primary btn-lg" id="stress-begin">开始练习</button>
+    </div>
+    <div id="stress-run" hidden>
+      <div class="quiz-top"><span id="stress-qnum">第 1 题</span><span id="stress-progress">1 / 10</span></div>
+      <div class="spell-question">
+        <button class="speak-btn" id="stress-speak" title="点击朗读">🔊</button>
+        <div class="stress-word" id="stress-word"></div>
+        <div class="spell-hint">提示:单词不带重音显示,听完发音选重音位置;没听清点左上角 🔊</div>
+      </div>
+      <div class="stress-options" id="stress-options"></div>
+      <div class="spell-feedback" id="stress-feedback"></div>
+      <button class="btn btn-primary" id="stress-next" hidden>下一题 →</button>
+    </div>
+    <div id="stress-result" hidden>
+      <div class="result-box">
+        <div class="score-ring">
+          <svg viewBox="0 0 116 116"><circle class="ring-bg" cx="58" cy="58" r="50"/><circle class="ring-fill" id="stress-ring-fill" cx="58" cy="58" r="50" stroke-dasharray="314" stroke-dashoffset="314"/></svg>
+          <div class="ring-text"><span class="ring-score" id="stress-result-score">0</span><span class="ring-total" id="stress-result-total">/ 10</span></div>
+        </div>
+        <p class="result-msg" id="stress-result-msg"></p>
+      </div>
+      <div class="wrong-list" id="stress-wrong"></div>
+      <button class="btn btn-primary btn-lg" id="stress-again">再来一次</button>
+    </div>
+  </div>
+  <div id="speak-letters">
+    <h3 class="section-label">发音基础：字母表</h3>
+    <p class="sub-tip">先过一遍字母发音再开始跟读。点 🔊 听示例单词。</p>
+    <div id="letters-container"></div>
+  </div>
+  <h3 class="section-label">跟读练习</h3>
+  <p class="sub-tip">方法:先听一遍 → 模仿跟读 3 遍 → 再看中文。可用慢速按钮。</p>
+  <div class="rate-btns">
+    <button class="btn btn-light btn-sm" id="rate-normal">常速</button>
+    <button class="btn btn-light btn-sm" id="rate-slow">慢速</button>
+  </div>
+  <div id="sentences-container" class="sentence-list"></div>
+  <div id="speak-twisters">
+    <h3 class="section-label">绕口令</h3>
+    <p class="sub-tip">练易混音的利器,读顺了就出师了。</p>
+    <div id="twisters-container"></div>
+  </div>
+  <div id="speak-dialogues">
+    <h3 class="section-label">情景对话</h3>
+    <p class="sub-tip">分角色跟读:先当 A,再当 B,最后整段复述。</p>
+    <div id="dialogues-container"></div>
+  </div>
+</section>
+
+<!-- ===== 日常用语 ===== -->
+<section class="spa-panel" id="panel-phrases">
+  <div class="panel-head"><h2>日常用语</h2></div>
+  <p class="sub-tip">按场景分组,点 🔊 听发音。目标:每句都能脱口而出。</p>
+  <div class="phrase-filter"><input id="phrase-search" type="search" placeholder="搜索句子…"></div>
+  <div id="phrases-container"></div>
+</section>
+
+<!-- ===== 语法 ===== -->
+<section class="spa-panel" id="panel-grammar">
+  <div class="panel-head"><h2>语法入门</h2></div>
+  <p class="sub-tip">按学习计划第 2–4 月的重点整理。先看懂框架,再逐个击破,不要一次背完。</p>
+  <details class="grammar-card" open>
+    <summary>1. 名词的性:阳性 / 阴性 / 中性</summary>
+    <div class="grammar-body">
+      <p>俄语名词分三种性,主要看词尾:</p>
+      <table class="g-table">
+        <tr><th>性</th><th>词尾</th><th>例子</th></tr>
+        <tr><td>阳性</td><td>辅音结尾、-й、-ь(部分)</td><td>дом 房子、чай 茶、слова́рь 词典</td></tr>
+        <tr><td>阴性</td><td>-а、-я、-ь(部分)</td><td>кни́га 书、семья́ 家庭、дверь 门</td></tr>
+        <tr><td>中性</td><td>-о、-е、-мя</td><td>окно́ 窗户、мо́ре 海、и́мя 名字</td></tr>
+      </table>
+      <p class="tip">💡 -ь 结尾的要单独记:слова́рь(阳)、дверь(阴)。</p>
+    </div>
+  </details>
+  <details class="grammar-card">
+    <summary>2. 名词的复数</summary>
+    <div class="grammar-body">
+      <table class="g-table">
+        <tr><th>单数词尾</th><th>复数词尾</th><th>例子</th></tr>
+        <tr><td>辅音、-а</td><td>-ы</td><td>стол → столы́ 桌子</td></tr>
+        <tr><td>-й、-я、-ь</td><td>-и</td><td>слова́рь → словари́ 词典</td></tr>
+        <tr><td>-о</td><td>-а</td><td>окно́ → о́кна 窗户</td></tr>
+        <tr><td>-е</td><td>-я</td><td>мо́ре → моря́ 海</td></tr>
+      </table>
+    </div>
+  </details>
+  <details class="grammar-card">
+    <summary>3. 名词六格总览(核心难点)</summary>
+    <div class="grammar-body">
+      <p>俄语名词在不同句子成分中用不同的"格",共六个。先记住每格回答什么问题:</p>
+      <table class="g-table">
+        <tr><th>格</th><th>提问词</th><th>主要用法</th></tr>
+        <tr><td>主格</td><td>кто? что?(谁?什么?)</td><td>主语</td></tr>
+        <tr><td>属格</td><td>кого́? чего́?(谁的?什么的?)</td><td>所属、"没有"、数量之后</td></tr>
+        <tr><td>与格</td><td>кому́? чему́?(给谁?)</td><td>间接宾语、"我感到…"</td></tr>
+        <tr><td>宾格</td><td>кого́? что?</td><td>直接宾语</td></tr>
+        <tr><td>工具格</td><td>кем? чем?(用什么?)</td><td>工具、方式、职业</td></tr>
+        <tr><td>前置格</td><td>о ком? о чём?(关于…)</td><td>只和 в / на / о 等介词连用</td></tr>
+      </table>
+      <p>示例:кни́га(书,阴性)</p>
+      <table class="g-table">
+        <tr><th>格</th><th>单数</th><th>例句</th></tr>
+        <tr><td>主格</td><td>кни́га</td><td>Э́то кни́га. 这是书。</td></tr>
+        <tr><td>属格</td><td>кни́ги</td><td>У меня́ нет кни́ги. 我没有书。</td></tr>
+        <tr><td>与格</td><td>кни́ге</td><td>Я рад кни́ге. 我为书高兴。</td></tr>
+        <tr><td>宾格</td><td>кни́гу</td><td>Я чита́ю кни́гу. 我在读书。</td></tr>
+        <tr><td>工具格</td><td>кни́гой</td><td>Я интересу́юсь кни́гой. 我对书感兴趣。</td></tr>
+        <tr><td>前置格</td><td>о кни́ге</td><td>Мы говори́м о кни́ге. 我们在谈论书。</td></tr>
+      </table>
+      <p class="tip">💡 学一个格就造 10 个句子,比背整张表有效得多。</p>
+    </div>
+  </details>
+  <details class="grammar-card">
+    <summary>4. 动词现在时变位</summary>
+    <div class="grammar-body">
+      <p><b>第一变位法</b>(-ать、-еть 等):чита́ть 读</p>
+      <table class="g-table">
+        <tr><th>人称</th><th>变位</th></tr>
+        <tr><td>я 我</td><td>чита́ю</td></tr><tr><td>ты 你</td><td>чита́ешь</td></tr>
+        <tr><td>он / она́ 他/她</td><td>чита́ет</td></tr><tr><td>мы 我们</td><td>чита́ем</td></tr>
+        <tr><td>вы 你们/您</td><td>чита́ете</td></tr><tr><td>они́ 他们</td><td>чита́ют</td></tr>
+      </table>
+      <p><b>第二变位法</b>(-ить 等):говори́ть 说</p>
+      <table class="g-table">
+        <tr><th>人称</th><th>变位</th></tr>
+        <tr><td>я</td><td>говорю́</td></tr><tr><td>ты</td><td>говори́шь</td></tr>
+        <tr><td>он / она́</td><td>говори́т</td></tr><tr><td>мы</td><td>говори́м</td></tr>
+        <tr><td>вы</td><td>говори́те</td></tr><tr><td>они́</td><td>говоря́т</td></tr>
+      </table>
+      <p class="tip">💡 每天手写 3 个动词的完整变位,一周后就会形成感觉。</p>
+    </div>
+  </details>
+  <details class="grammar-card">
+    <summary>5. 动词的体:未完成体 / 完成体</summary>
+    <div class="grammar-body">
+      <p>俄语动词分"体",表示动作是否完成:</p>
+      <table class="g-table">
+        <tr><th>体</th><th>含义</th><th>例子</th></tr>
+        <tr><td>未完成体</td><td>过程、习惯、正在进行</td><td>Я чита́ю кни́гу. 我在读书。</td></tr>
+        <tr><td>完成体</td><td>动作完成、一次性结果</td><td>Я прочита́л кни́гу. 我读完了书。</td></tr>
+      </table>
+      <p class="tip">💡 完成体没有现在时(已经"完成了"),只有过去时和将来时。</p>
+    </div>
+  </details>
+  <details class="grammar-card">
+    <summary>6. 时态:过去时 / 将来时</summary>
+    <div class="grammar-body">
+      <p><b>过去时</b>:动词原形去掉 -ть,加 -л(阳)/ -ла(阴)/ -ло(中)/ -ли(复):</p>
+      <ul class="g-list">
+        <li>Он чита́л. — 他读过。</li>
+        <li>Она́ чита́ла. — 她读过。</li>
+        <li>Они́ чита́ли. — 他们读过。</li>
+      </ul>
+      <p><b>将来时</b>:быть 的将来时变位 + 动词原形:</p>
+      <ul class="g-list">
+        <li>Я бу́ду чита́ть. — 我将要读。</li>
+        <li>Он бу́дет говори́ть. — 他将要说。</li>
+      </ul>
+    </div>
+  </details>
+  <details class="grammar-card">
+    <summary>7. 物主代词:我的 / 你的 / 我们的</summary>
+    <div class="grammar-body">
+      <p>物主代词跟着名词的性、数变化:</p>
+      <table class="g-table">
+        <tr><th>名词性数</th><th>我的</th><th>你的</th><th>我们的</th><th>例子</th></tr>
+        <tr><td>阳性</td><td>мой</td><td>твой</td><td>наш</td><td>мой дом 我的房子</td></tr>
+        <tr><td>阴性</td><td>моя́</td><td>твоя́</td><td>на́ша</td><td>моя́ кни́га 我的书</td></tr>
+        <tr><td>中性</td><td>моё</td><td>твоё</td><td>на́ше</td><td>моё окно́ 我的窗户</td></tr>
+        <tr><td>复数</td><td>мои́</td><td>твои́</td><td>на́ши</td><td>мои́ кни́ги 我的书(复)</td></tr>
+      </table>
+    </div>
+  </details>
+  <details class="grammar-card">
+    <summary>8. 五个万能句型</summary>
+    <div class="grammar-body">
+      <ul class="g-list">
+        <li><b>Э́то + 主格</b>:Э́то моя́ ма́ма. — 这是我妈妈。</li>
+        <li><b>У + 属格 + есть + 主格</b>:У меня́ есть брат. — 我有一个兄弟。</li>
+        <li><b>Мне + 与格 + нра́вится + 主格</b>:Мне нра́вится Москва́. — 我喜欢莫斯科。</li>
+        <li><b>否定:нет + 属格</b>:У меня́ нет вре́мени. — 我没有时间。</li>
+        <li><b>Я хочу́ + 动词原形</b>:Я хочу́ спать. — 我想睡觉。</li>
+      </ul>
+      <p class="tip">💡 这 5 个句型能应付大量日常表达,先练熟。</p>
+    </div>
+  </details>
+  <details class="grammar-card">
+    <summary>9. 形容词的性与数</summary>
+    <div class="grammar-body">
+      <p>形容词词尾跟随名词变化:</p>
+      <table class="g-table">
+        <tr><th>性数</th><th>词尾</th><th>例子</th></tr>
+        <tr><td>阳性</td><td>-ый / -ий / -ой</td><td>но́вый дом 新房子</td></tr>
+        <tr><td>阴性</td><td>-ая</td><td>но́вая кни́га 新书</td></tr>
+        <tr><td>中性</td><td>-ое</td><td>но́вое окно́ 新窗户</td></tr>
+        <tr><td>复数</td><td>-ые</td><td>но́вые кни́ги 新书(复)</td></tr>
+      </table>
+    </div>
+  </details>
+</section>
+
+<!-- ===== 打卡 ===== -->
+<section class="spa-panel" id="panel-checkin">
+  <div class="panel-head"><h2>学习打卡</h2></div>
+  <div class="checkin-hero">
+    <div class="hero-fire">
+      <svg class="fire-svg" viewBox="0 0 64 64" width="48" height="48" aria-hidden="true">
+        <path class="flame-1" d="M32 4 C28 14 20 20 20 30 C20 36 25 42 32 42 C39 42 44 36 44 30 C44 20 36 14 32 4 Z" fill="var(--flame-core)"/>
+        <path class="flame-2" d="M32 16 C30 24 26 28 26 34 C26 38 29 42 32 42 C35 42 38 38 38 34 C38 28 34 24 32 16 Z" fill="var(--flame-mid)"/>
+        <path class="flame-3" d="M32 26 C31 30 29 33 29 36 C29 39 30 41 32 41 C34 41 35 39 35 36 C35 33 33 30 32 26 Z" fill="var(--flame-tip)"/>
+      </svg>
+    </div>
+    <div class="streak-num" id="streak-days">0</div>
+    <div class="streak-label">连续学习天数</div>
+    <div class="streak-milestones" id="streak-milestones">
+      <span class="milestone" data-target="3">3天</span>
+      <span class="milestone" data-target="7">7天</span>
+      <span class="milestone" data-target="30">30天</span>
+      <span class="milestone" data-target="100">100天</span>
+    </div>
+    <button class="btn btn-primary btn-lg checkin-btn" id="checkin-btn">今日打卡</button>
+    <p class="checkin-msg" id="checkin-msg"></p>
+  </div>
+  <div class="month-ring-wrap">
+    <svg class="month-ring" viewBox="0 0 120 120" width="120" height="120">
+      <circle class="ring-bg" cx="60" cy="60" r="52" fill="none" stroke="var(--border)" stroke-width="8"/>
+      <circle class="ring-fill" id="ring-fill" cx="60" cy="60" r="52" fill="none" stroke="var(--primary)" stroke-width="8" stroke-linecap="round" stroke-dasharray="326.73" stroke-dashoffset="326.73" transform="rotate(-90 60 60)"/>
+      <text class="ring-text" x="60" y="55" text-anchor="middle" font-size="22" font-weight="700" fill="var(--text)" font-family="var(--font-mono)" id="ring-num">0</text>
+      <text class="ring-sub" x="60" y="74" text-anchor="middle" font-size="9" fill="var(--text-muted)" font-family="var(--font-mono)" id="ring-sub">/ 本月已学</text>
+    </svg>
+    <div class="month-ring-info">
+      <div class="ring-stat"><span class="label">本月新学</span><b id="month-new">0</b></div>
+      <div class="ring-stat"><span class="label">已掌握</span><b id="month-mastered">0</b></div>
+      <div class="ring-stat"><span class="label">待复习</span><b id="month-due">0</b></div>
+    </div>
+  </div>
+  <h3 class="cal-section-title">最近 8 周</h3>
+  <div class="calendar" id="calendar"></div>
+  <p class="total-days">累计打卡 <b id="checkin-total">0</b> 天</p>
+
+  <div style="margin-top:32px">
+    <div class="panel-head"><h2>🏆 成就徽章</h2><span class="sub-tip" id="achievement-count">0 / 0</span></div>
+    <div class="badge-grid" id="achievement-grid"></div>
+  </div>
+  <div style="margin-top:32px">
+    <div class="panel-head"><h2>学习统计</h2><span class="sub-tip">近 30 天 · 每天新学与复习的词数</span></div>
+    <div class="chart-legend">
+      <span class="legend-item"><i class="legend-dot" style="background:var(--chart-new)"></i>每日新学</span>
+      <span class="legend-item"><i class="legend-dot" style="background:var(--chart-review)"></i>每日复习</span>
+    </div>
+    <div class="chart-wrap" id="stats-chart"></div>
+    <div class="chart-tip" id="chart-tip" hidden></div>
+    <div class="chart-summary">
+      <span>近 30 天新学 <b id="stats-new-total">0</b> 词</span>
+      <span>近 30 天复习 <b id="stats-rev-total">0</b> 词</span>
+    </div>
+    <details class="stats-detail"><summary>📋 查看明细表</summary><div class="stats-table" id="stats-table"></div></details>
+  </div>
+  <div style="margin-top:32px">
+    <div class="panel-head"><h2>学习周报</h2><span class="sub-tip" id="weekly-range-label">本周</span></div>
+    <div class="weekly-nav">
+      <button class="btn btn-light btn-sm" id="weekly-prev">← 上周</button>
+      <button class="btn btn-light btn-sm" id="weekly-today">本周</button>
+      <button class="btn btn-light btn-sm" id="weekly-next">下周</button>
+    </div>
+    <div class="weekly-grid" id="weekly-grid"></div>
+    <div class="weekly-footer" id="weekly-footer"></div>
+  </div>
+</section>
 
 </main>
 
@@ -247,7 +704,7 @@
   </div>
 </div>
 
-<!-- 查词搜索弹窗(任意页面可用) -->
+<!-- 查词搜索弹窗 -->
 <div class="modal" id="search-modal" hidden>
   <div class="modal-box search-box">
     <h3>查词</h3>
@@ -273,14 +730,11 @@
   </div>
 </div>
 
-<!-- 磨耳朵弹窗:自动连续朗读单词 -->
+<!-- 磨耳朵弹窗 -->
 <div class="modal" id="ear-modal" hidden>
   <div class="modal-box ear-box">
     <h3>磨耳朵</h3>
-    <div class="ear-now">
-      <div class="ear-ru" id="ear-ru">—</div>
-      <div class="ear-zh" id="ear-zh"></div>
-    </div>
+    <div class="ear-now"><div class="ear-ru" id="ear-ru">—</div><div class="ear-zh" id="ear-zh"></div></div>
     <div class="ear-progress" id="ear-progress">0 / 0</div>
     <div class="ear-controls">
       <button class="btn btn-primary" id="ear-toggle">开始</button>
@@ -309,9 +763,7 @@
       </label>
     </div>
     <p class="modal-tip">戴上耳机,盲听跟读;暂停后再按「继续」从当前词重播</p>
-    <div class="modal-actions">
-      <button class="btn btn-light" id="ear-close">关闭</button>
-    </div>
+    <div class="modal-actions"><button class="btn btn-light" id="ear-close">关闭</button></div>
   </div>
 </div>
 

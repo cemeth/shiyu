@@ -3,8 +3,13 @@
 
 'use strict';
 
-const $ = (sel) => document.querySelector(sel);
-const on = (sel, ev, fn) => { const el = $(sel); if (el) el.addEventListener(ev, fn); }; // 空安全事件绑定(多页面:元素不在当前页时静默跳过)
+// SPA 作用域查询:优先在激活面板内搜索,找不到再全局搜索(用于 modals/splash 等共享元素)
+const $ = (sel, ctx) => {
+  const panel = document.querySelector('.spa-panel.active');
+  if (panel) { const r = panel.querySelector(sel); if (r) return r; }
+  return (ctx || document).querySelector(sel);
+};
+const on = (sel, ev, fn) => { const el = $(sel); if (el) el.addEventListener(ev, fn); }; // 空安全事件绑定
 
 // ========== 开场动画:首次打开完整播放(1.75s),同标签页内切页快速闪过(0.9s),点击可跳过 ==========
 const splash = $('#splash');
@@ -20,6 +25,8 @@ if (splash) {
 // ========== 全局状态 ==========
 const PAGE = document.body.dataset.page || 'home'; // 当前页面:home / quiz / spell / review / speak / phrases / grammar / checkin
 const PAGE_TITLES = { home: '背单词', quiz: '小测验', spell: '拼写', review: '复习', speak: '口语', phrases: '日常用语', grammar: '语法', checkin: '打卡' };
+// SPA hash 路由(单页模式):读取当前 hash,无 hash 默认 home
+function getSPAPage() { return (location.hash || '#home').replace('#', '') || 'home'; }
 let lang = null;                       // 当前语言(registry 项)
 const loadedCodes = new Set(['ru']);   // data-ru.js 已在 HTML 中静态加载
 let learned = {};                      // { 单词键: true }
@@ -496,7 +503,7 @@ function importBulkWords() {
   }
   saveCustom(); saveLearned(); saveWordDates(); saveWordReview();
   addWordModal(false);
-  if (PAGE === 'home') {                                          // 首页:刷新词库与卡片
+  if (currentPage === 'home') {                                          // 首页:刷新词库与卡片
     packId = 'base';                                              // 自定义词在基础词汇包
     localStorage.setItem(pkey('pack'), packId);
     if (!packOpen) {
@@ -536,7 +543,7 @@ function saveCustomWord() {
   wordReview[k] = { stage: 0, nextDue: addDays(INTERVALS[0]), wrong: 0 }; // 明天开始第 1 轮复习
   saveLearned(); saveWordDates(); saveWordReview();
   addWordModal(false);
-  if (PAGE === 'home') {                                        // 首页:刷新词库与卡片
+  if (currentPage === 'home') {                                        // 首页:刷新词库与卡片
     packId = 'base';                                            // 自定义词在基础词汇包
     localStorage.setItem(pkey('pack'), packId);
     if (!packOpen) {
@@ -1197,7 +1204,7 @@ function checkAchievements() {
   toast(newGot.length === 1
     ? '🎉 解锁成就:' + newGot[0].emoji + ' ' + newGot[0].name
     : '🎉 一次解锁 ' + newGot.length + ' 个成就:' + newGot.map((a) => a.emoji).join(''));
-  if (PAGE === 'checkin') renderAchievements();
+  if (currentPage === 'checkin') renderAchievements();
 }
 // 徽章墙(打卡页):已达成彩色高亮,未达成灰色锁定
 function renderAchievements() {
@@ -1531,21 +1538,81 @@ function switchLang(code) {
   document.body.appendChild(s);
 }
 
+// ========== SPA 路由：hash 驱动面板切换 ==========
+function switchPanel(target) {
+  const page = target || getSPAPage();
+  history.replaceState(null, '', '#' + page);
+  document.querySelectorAll('.spa-panel').forEach(p => p.classList.remove('active'));
+  const panel = $('#panel-' + page);
+  if (panel) panel.classList.add('active');
+  document.querySelectorAll('.spa-tab').forEach(t => {
+    const active = t.dataset.target === page;
+    t.classList.toggle('active', active);
+    t.setAttribute('aria-selected', active);
+  });
+  // 同步 url hash 到 body data-page
+  document.body.dataset.page = page;
+  // 更新标题
+  const langName = lang ? lang.name : '';
+  document.title = langName + '学习助手 · ' + (PAGE_TITLES[page] || '言灯');
+  // 滚动到顶部
+  window.scrollTo(0, 0);
+}
+
+document.addEventListener('hashchange', () => {
+  const page = getSPAPage();
+  document.querySelectorAll('.spa-panel').forEach(p => p.classList.remove('active'));
+  const panel = $('#panel-' + page);
+  if (panel) panel.classList.add('active');
+  document.querySelectorAll('.spa-tab').forEach(t => {
+    const active = t.dataset.target === page;
+    t.classList.toggle('active', active);
+    t.setAttribute('aria-selected', active);
+  });
+  document.body.dataset.page = page;
+  if (lang) document.title = lang.name + '学习助手 · ' + (PAGE_TITLES[page] || '言灯');
+});
+
+// SPA 导航按钮点击
+document.addEventListener('click', (e) => {
+  const tab = e.target.closest('.spa-tab');
+  if (tab) { e.preventDefault(); switchPanel(tab.dataset.target); return; }
+  const link = e.target.closest('.spa-nav a[href^="#"]');
+  if (link) { e.preventDefault(); switchPanel(link.hash.replace('#', '')); }
+});
+
+// 初始化：根据 hash 打开对应面板
+(function initSPARoute() {
+  const page = getSPAPage();
+  document.body.dataset.page = page;
+  document.querySelectorAll('.spa-panel').forEach(p => {
+    p.classList.toggle('active', p.id === 'panel-' + page);
+  });
+  document.querySelectorAll('.spa-tab').forEach(t => {
+    const active = t.dataset.target === page;
+    t.classList.toggle('active', active);
+    t.setAttribute('aria-selected', active);
+  });
+  if (!location.hash) location.hash = '#home';
+})();
+// ========== SPA 路由结束 ==========
+
 // 每个页面只渲染自己的模块
 function initAll(newLang, quiet) {
   lang = newLang;
-  document.title = lang.name + '学习助手 · ' + (PAGE_TITLES[PAGE] || '');
+  const currentPage = getSPAPage();
+  document.title = lang.name + '学习助手 · ' + (PAGE_TITLES[currentPage] || '');
   loadState(); // 每个语言独立的进度
   // 当前词库包(各页共用的上下文:测验/拼写/复习都按当前包统计)
   packId = localStorage.getItem(pkey('pack')) || 'base';
   if (!packList().some((p) => p.id === packId)) packId = 'base';
   // 语法入口:该语言没有语法内容时隐藏导航链接
-  const gLink = document.querySelector('.tab[data-tab="grammar"]');
+  const gLink = document.querySelector('[data-tab="grammar"]');
   if (gLink) gLink.style.display = lang.hasGrammar ? '' : 'none';
   // 俄语专属模块(重音练习等):其他语言自动隐藏
   document.querySelectorAll('[data-ru-only]').forEach((el) => { el.style.display = lang.code === 'ru' ? '' : 'none'; });
 
-  if (PAGE === 'home') {
+  if (currentPage === 'home') {
     packOpen = false; // 打开首页先看词库包选择面板,点入包才展开单词
     renderPackTabs();
     renderPackGate();
@@ -1561,16 +1628,16 @@ function initAll(newLang, quiet) {
     rotateQuote();
     clearInterval(quoteTimer);
     quoteTimer = setInterval(rotateQuote, 6000);
-  } else if (PAGE === 'quiz') {
+  } else if (currentPage === 'quiz') {
     resetQuizUI();
     updateQuizInfo();
-  } else if (PAGE === 'spell') {
+  } else if (currentPage === 'spell') {
     resetSpellUI();
     updateSpellInfo();
-  } else if (PAGE === 'review') {
+  } else if (currentPage === 'review') {
     reviewIdx = 0;
     setReviewTab(reviewTab); // 复习四视图
-  } else if (PAGE === 'speak') {
+  } else if (currentPage === 'speak') {
     $('#speak-letters').hidden = !window.LETTER_GROUPS;
     $('#speak-twisters').hidden = !(window.TONGUE_TWISTERS && window.TONGUE_TWISTERS.length);
     $('#speak-dialogues').hidden = !(window.DIALOGUES && window.DIALOGUES.length);
@@ -1580,9 +1647,9 @@ function initAll(newLang, quiet) {
     renderDialogues();
     toggleRate();
     updateStressInfo(); // 重音练习(俄语专属,其他语言整块隐藏)
-  } else if (PAGE === 'phrases') {
+  } else if (currentPage === 'phrases') {
     renderPhrases();
-  } else if (PAGE === 'checkin') {
+  } else if (currentPage === 'checkin') {
     renderCheckin();
   }
   checkAchievements(); // 启动/切语言时兜底检查(如导入数据后)
@@ -1982,7 +2049,7 @@ document.addEventListener('keydown', (e) => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   const key = e.key;
   // 背单词页快捷键
-  if (PAGE === 'home' && curWord) {
+  if (currentPage === 'home' && curWord) {
     if (key === ' ' || key === 'Enter') { e.preventDefault(); $('#flashcard').classList.toggle('flipped'); }
     else if (key === 'ArrowLeft')  { e.preventDefault(); goNext(-1); }
     else if (key === 'ArrowRight') { e.preventDefault(); goNext(1); }
@@ -1991,7 +2058,7 @@ document.addEventListener('keydown', (e) => {
     else if (key === '3') { e.preventDefault(); markKnown(); }
   }
   // 复习页快捷键
-  else if (PAGE === 'review' && reviewWord && reviewTab === 'due') {
+  else if (currentPage === 'review' && reviewWord && reviewTab === 'due') {
     if (key === ' ' || key === 'Enter') { e.preventDefault(); $('#review-card').classList.toggle('flipped'); }
     else if (key === 'ArrowLeft')  { e.preventDefault(); reviewNext(-1); }
     else if (key === 'ArrowRight') { e.preventDefault(); reviewNext(1); }
@@ -1999,7 +2066,7 @@ document.addEventListener('keydown', (e) => {
     else if (key === '3') { e.preventDefault(); reviewKnown(); }
   }
   // 拼写页: Enter提交, →下一题
-  else if (PAGE === 'spell' && spell && !$('#spell-run').hidden) {
+  else if (currentPage === 'spell' && spell && !$('#spell-run').hidden) {
     if (key === 'Enter' && !$('#spell-input').disabled) {
       e.preventDefault(); submitSpell();
     } else if (key === 'ArrowRight' || (key === 'Enter' && $('#spell-next') && !$('#spell-next').hidden)) {
