@@ -95,7 +95,10 @@
       </div>
       <div id="stress-result" hidden>
         <div class="result-box">
-          <div class="score-ring"><span id="stress-result-score">0</span><small>/ 10</small></div>
+          <div class="score-ring">
+            <svg viewBox="0 0 116 116"><circle class="ring-bg" cx="58" cy="58" r="50"/><circle class="ring-fill" id="stress-ring-fill" cx="58" cy="58" r="50" stroke-dasharray="314" stroke-dashoffset="314"/></svg>
+            <div class="ring-text"><span class="ring-score" id="stress-result-score">0</span><span class="ring-total" id="stress-result-total">/ 10</span></div>
+          </div>
           <p class="result-msg" id="stress-result-msg"></p>
         </div>
         <div class="wrong-list" id="stress-wrong"></div>

@@ -466,18 +466,37 @@ body.dark .btn-outline:hover:not(:disabled) { background: rgba(160,144,120,.12);
   border: 1px solid var(--border); border-radius: var(--radius);
   padding: 20px 22px; cursor: pointer; font-family: inherit; color: var(--text);
   background: var(--card); transition: all .25s cubic-bezier(.4,0,.2,1);
+  position: relative; overflow: hidden;
 }
+.pack-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: var(--pack-color, var(--primary)); opacity: .7; transition: opacity .2s;
+}
+.pack-card:hover::before { opacity: 1; }
+.pack-card[data-pack="base"]       { --pack-color: #1a56db; }
+.pack-card[data-pack="scenes"]     { --pack-color: #0891b2; }
+.pack-card[data-pack="freq"]       { --pack-color: #d97706; }
+.pack-card[data-pack="mistakes"]   { --pack-color: #dc2626; }
+.pack-card[data-pack="newscenes_ru"],
+.pack-card[data-pack="newscenes_en"] { --pack-color: #7c3aed; }
+.pack-card[data-pack="daily_ru"],
+.pack-card[data-pack="daily_en"]   { --pack-color: #15803d; }
 .pack-card:hover { border-color: var(--border-active); box-shadow: var(--shadow-lg); transform: translateY(-3px); }
-.pack-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pack-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-left: 10px; }
 .pack-card-name { font-size: 15px; font-weight: 600; color: var(--text); }
 .pack-card-count {
   font-size: 11px; background: var(--primary-bg); color: var(--primary);
   padding: 2px 10px; border-radius: 999px; font-family: var(--font-mono); font-weight: 500;
 }
 .pack-card-desc { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin: 0; }
-.pack-card-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
-.pack-card-bar i { display: block; height: 100%; border-radius: 2px; background: var(--primary); transition: width .6s ease; }
-.pack-card-meta { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+.pack-card-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.pack-card-bar i {
+  display: block; height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, var(--pack-color, var(--primary)), color-mix(in srgb, var(--pack-color, var(--primary)) 70%, #fff));
+  transition: width .6s ease;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.25);
+}
+.pack-card-meta { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); margin-left: 10px; }
 #vocab-area { animation: panelIn .35s ease; }
 #vocab-area.area-fade { animation: areaIn .35s cubic-bezier(.4,0,.2,1) both; }
 @keyframes areaIn { from { opacity: 0; transform: translateY(14px); } }
@@ -560,14 +579,15 @@ body.dark .btn-outline:hover:not(:disabled) { background: rgba(160,144,120,.12);
 .search-cat { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); }
 
 /* ========== 艾宾浩斯阶段指示器 ========== */
-.phase-dots { display: flex; gap: 5px; justify-content: center; margin-bottom: 8px; }
+.phase-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 10px; }
 .phase-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--border); border: 1.5px solid var(--border);
-  transition: all .2s;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--border-subtle); border: 1.5px solid var(--border);
+  transition: all .25s ease;
 }
-.phase-dot.done { background: var(--green); border-color: var(--green); }
-.phase-dot.current { background: var(--primary); border-color: var(--primary); }
+.phase-dot.done { background: var(--green); border-color: var(--green); box-shadow: 0 0 0 2px color-mix(in srgb, var(--green) 15%, transparent); }
+.phase-dot.current { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 20%, transparent); animation: dotPulse 1.5s ease-in-out infinite; }
+@keyframes dotPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.2); } }
 
 /* ========== 今日精选徽章 ========== */
 .today-badge {
@@ -638,14 +658,25 @@ body.dark .btn-outline:hover:not(:disabled) { background: rgba(160,144,120,.12);
   box-shadow: var(--shadow-md);
 }
 .score-ring {
-  width: 108px; height: 108px; border-radius: 50%; margin: 0 auto 10px;
-  border: 2px solid var(--border); color: var(--text);
-  display: flex; align-items: center; justify-content: center; flex-direction: column;
-  font-size: 2rem; font-weight: 700;
+  width: 116px; height: 116px; margin: 0 auto 10px;
+  position: relative;
   animation: scoreReveal .5s cubic-bezier(.22,.9,.36,1) both;
 }
-@keyframes scoreReveal { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.score-ring small { font-size: 12px; font-weight: 400; color: var(--text-muted); font-family: var(--font-mono); }
+.score-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.score-ring circle { fill: none; stroke-width: 5; }
+.score-ring .ring-bg { stroke: var(--border); }
+.score-ring .ring-fill {
+  stroke: var(--primary);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s cubic-bezier(.4,0,.2,1);
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--primary) 40%, transparent));
+}
+.score-ring .ring-text {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column;
+  transform: none;
+}
+.score-ring .ring-score { font-size: 2rem; font-weight: 700; color: var(--text); line-height: 1; }
+.score-ring .ring-total { font-size: 12px; font-weight: 400; color: var(--text-muted); font-family: var(--font-mono); margin-top: 2px; }
 .result-msg { color: var(--text-muted); margin-bottom: 8px; font-size: 13px; }
 #quiz-again { display: block; margin: 10px auto 0; }
 .wrong-list { margin: 12px 0 22px; display: flex; flex-direction: column; gap: 8px; }
@@ -655,6 +686,10 @@ body.dark .btn-outline:hover:not(:disabled) { background: rgba(160,144,120,.12);
 }
 .wrong-ru { font-weight: 700; font-size: 17px; color: var(--text); font-family: 'Noto Serif SC', 'Source Han Serif CN', Georgia, serif; letter-spacing: .4px; }
 .wrong-zh { color: var(--text-secondary); flex: 1; font-weight: 400; }
+.wrong-source { font-size: 10px; font-family: var(--font-mono); padding: 2px 7px; border-radius: 999px; white-space: nowrap; flex-shrink: 0; font-weight: 500; }
+.wrong-source.quiz-src  { background: rgba(26,86,219,.1); color: var(--primary); }
+.wrong-source.spell-src { background: rgba(217,119,6,.1); color: #b45309; }
+.wrong-source.stress-src { background: rgba(185,28,28,.08); color: var(--accent); }
 .no-wrong { text-align: center; color: var(--text-muted); padding: 10px 0; font-family: var(--font-mono); }
 
 /* ========== 拼写 ========== */
@@ -975,12 +1010,18 @@ body.dark .btn-outline:hover:not(:disabled) { background: rgba(160,144,120,.12);
   border-color: var(--accent); border-width: 1.5px;
   font-weight: 600; color: var(--text);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
+  animation: todayPulse 2.5s ease-in-out infinite;
+}
+@keyframes todayPulse {
+  0%, 100% { box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent); }
+  50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 8%, transparent); }
 }
 .cal-cell.future { opacity: .25; }
 .cal-cell.checked {
-  background: linear-gradient(135deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 80%, var(--accent)) 100%);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 85%, #fff) 0%, var(--primary) 50%, color-mix(in srgb, var(--primary) 75%, var(--accent)) 100%);
   border-color: transparent; color: #fff; font-weight: 600;
   animation: calPop .25s cubic-bezier(.22,.9,.36,1) both;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--primary) 25%, transparent);
 }
 .cal-cell.checked:hover { transform: scale(1.1); }
 @keyframes calPop { from { transform: scale(.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -995,7 +1036,8 @@ body.dark .btn-outline:hover:not(:disabled) { background: rgba(160,144,120,.12);
   transition: all .15s ease; font-family: inherit; font-weight: 400;
 }
 .review-tab:hover { border-color: var(--border-active); color: var(--text); }
-.review-tab.active { background: var(--text); border-color: var(--text); color: var(--bg); }
+.review-tab.active { background: var(--text); border-color: var(--text); color: var(--bg); box-shadow: inset 0 1px 3px rgba(0,0,0,.12); }
+body.dark .review-tab.active { box-shadow: inset 0 1px 3px rgba(0,0,0,.3); }
 .review-tab:active { transform: scale(.97); }
 
 /* 生词本 / 错词本 */
@@ -1087,10 +1129,10 @@ body.dark .btn-outline:hover:not(:disabled) { background: rgba(160,144,120,.12);
 /* ========== 滚动条 ========== */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(0,0,0,.1); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,.18); }
-body.dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); }
-body.dark ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.14); }
+::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--text) 12%, transparent); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--text) 22%, transparent); }
+body.dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); }
+body.dark ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.18); }
 
 /* ========== 成就徽章 ========== */
 .badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
@@ -1359,7 +1401,7 @@ body[data-layout='editorial'] .today-badge {
 }
 body[data-layout='editorial'] .daily-word { border-radius: 0; border-left: 1px solid var(--border); }
 body[data-layout='editorial'] .btn { border-radius: 0; }
-body[data-layout='editorial'] .pack-card { border-radius: 0; border-left: 3px solid var(--primary); }
+body[data-layout='editorial'] .pack-card { border-radius: 0; border-left-width: 4px; }
 body[data-layout='editorial'] .container { padding-top: 56px; }
 
 /* ── 紧凑风(B): 高信息密度、卡片网格、工具感 ── */

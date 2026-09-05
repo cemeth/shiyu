@@ -571,7 +571,7 @@ function startQuiz() {
   const pool = learnedPool(); // 只从学习过的单词中出题
   if (pool.length < 4) { toast('学习过的单词太少,先把单词标记为「认识」再来测验吧'); return; }
   shuffle(pool);
-  quiz = { words: pool.slice(0, 10), idx: 0, score: 0, wrong: [], opts: [] };
+  quiz = { words: pool.slice(0, 10), idx: 0, score: 0, wrong: [], opts: [], type: 'quiz' };
   $('#quiz-start').hidden = true;
   $('#quiz-result').hidden = true;
   $('#quiz-run').hidden = false;
@@ -607,7 +607,7 @@ function answerQuiz(chosen) {
     if (quiz.opts[i] === w) b.classList.add('correct');
     else if (quiz.opts[i] === chosen) b.classList.add('wrong');
   });
-  if (correct) quiz.score++; else quiz.wrong.push(w);
+  if (correct) quiz.score++; else quiz.wrong.push({ ...w, src: 'quiz' });
   $('#quiz-score').textContent = '得分:' + quiz.score;
   $('#quiz-next').hidden = false;
 }
@@ -617,6 +617,20 @@ function finishQuiz() {
   $('#quiz-result').hidden = false;
   const total = quiz.words.length, score = quiz.score;
   $('#result-score').textContent = score;
+  $('#result-total').textContent = '/ ' + total;
+  const ring = $('#result-ring-fill');
+  if (ring) {
+    const circ = 2 * Math.PI * 50;
+    ring.style.transition = 'none';
+    ring.setAttribute('stroke-dasharray', circ);
+    ring.setAttribute('stroke-dashoffset', circ);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        ring.style.transition = 'stroke-dashoffset 1s cubic-bezier(.4,0,.2,1)';
+        ring.setAttribute('stroke-dashoffset', circ * (1 - score / total));
+      });
+    });
+  }
   $('#result-msg').textContent = score === total ? '满分!太棒了! 🎉'
     : score >= total * 0.8 ? '非常棒!继续保持! 💪'
     : score >= total * 0.6 ? '不错!再复习一下错题吧!'
@@ -630,7 +644,7 @@ function finishQuiz() {
   const box = $('#quiz-wrong');
   box.innerHTML = quiz.wrong.length
     ? quiz.wrong.map((w, i) =>
-        '<div class="wrong-item fade-item" style="animation-delay:' + (i * 50) + 'ms"><button class="speak-btn small" data-speak="' + esc(w.ru) + '">🔊</button><span class="wrong-ru">' + esc(w.ru) + '</span><span class="wrong-zh">' + esc(w.zh) + '</span></div>').join('')
+        '<div class="wrong-item fade-item" style="animation-delay:' + (i * 50) + 'ms"><button class="speak-btn small" data-speak="' + esc(w.ru) + '">🔊</button><span class="wrong-ru">' + esc(w.ru) + '</span><span class="wrong-zh">' + esc(w.zh) + '</span><span class="wrong-source quiz-src">测验</span></div>').join('')
     : '<p class="no-wrong">全部答对,没有错题! 👏</p>';
   updateHero();
   checkAchievements(); // 成就:测验最高分
@@ -668,7 +682,7 @@ function startSpell() {
   const pool = learnedPool(); // 只从学习过的单词中出题
   if (pool.length < 3) { toast('学习过的单词太少,先把单词标记为「认识」吧'); return; }
   shuffle(pool);
-  spell = { words: pool.slice(0, 10), idx: 0, score: 0, wrong: [] };
+  spell = { words: pool.slice(0, 10), idx: 0, score: 0, wrong: [], type: 'spell' };
   $('#spell-start').hidden = true;
   $('#spell-result').hidden = true;
   $('#spell-run').hidden = false;
@@ -720,7 +734,7 @@ function submitSpell() {
     fb.className = 'spell-feedback ok';
     fb.innerHTML = '✓ 正确! <span class="spell-correct-word">' + esc(w.ru) + '</span>';
   } else {
-    spell.wrong.push(w);
+    spell.wrong.push({ ...w, src: 'spell' });
     fb.className = 'spell-feedback no';
     fb.innerHTML = '✗ 正确答案:<span class="spell-correct-word">' + esc(w.ru) + '</span>(' + esc(w.zh) + ')';
   }
@@ -741,6 +755,9 @@ function finishSpell() {
   spell.wrong.forEach((w) => noteWrong(w)); // 拼错的词进入错词本
   const total = spell.words.length, score = spell.score;
   $('#spell-result-score').textContent = score;
+  $('#spell-result-total').textContent = '/ ' + total;
+  const spellRing = $('#spell-ring-fill');
+  if (spellRing) { const c = 2 * Math.PI * 50; spellRing.style.transition = 'none'; spellRing.setAttribute('stroke-dasharray', c); spellRing.setAttribute('stroke-dashoffset', c); requestAnimationFrame(() => { requestAnimationFrame(() => { spellRing.style.transition = 'stroke-dashoffset 1s cubic-bezier(.4,0,.2,1)'; spellRing.setAttribute('stroke-dashoffset', c * (1 - score / total)); }); }); }
   $('#spell-result-msg').textContent = score === total ? '满分!拼写大师! 🎉'
     : score >= total * 0.8 ? '非常棒!继续保持! 💪'
     : score >= total * 0.6 ? '不错!错词再抄写几遍吧!'
@@ -755,7 +772,7 @@ function finishSpell() {
   const box = $('#spell-wrong');
   box.innerHTML = spell.wrong.length
     ? spell.wrong.map((w, i) =>
-        '<div class="wrong-item fade-item" style="animation-delay:' + (i * 50) + 'ms"><button class="speak-btn small" data-speak="' + esc(w.ru) + '">🔊</button><span class="wrong-ru">' + esc(w.ru) + '</span><span class="wrong-zh">' + esc(w.zh) + '</span></div>').join('')
+        '<div class="wrong-item fade-item" style="animation-delay:' + (i * 50) + 'ms"><button class="speak-btn small" data-speak="' + esc(w.ru) + '">🔊</button><span class="wrong-ru">' + esc(w.ru) + '</span><span class="wrong-zh">' + esc(w.zh) + '</span><span class="wrong-source spell-src">拼写</span></div>').join('')
     : '<p class="no-wrong">全部拼对,没有错词! 👏</p>';
 }
 
@@ -789,7 +806,7 @@ function startStress() {
   const pool = learnedPool().filter((w) => stressSyllable(w.ru) > 0);
   if (pool.length < 3) { toast('学习过的带重音单词太少,先把单词标记为「认识」吧'); return; }
   shuffle(pool);
-  stressGame = { words: pool.slice(0, 10), idx: 0, score: 0, wrong: [] };
+  stressGame = { words: pool.slice(0, 10), idx: 0, score: 0, wrong: [], type: 'stress' };
   $('#stress-start').hidden = true;
   $('#stress-result').hidden = true;
   $('#stress-run').hidden = false;
@@ -828,7 +845,7 @@ function answerStress(n) {
     fb.className = 'spell-feedback ok';
     fb.innerHTML = '✓ 正确! <span class="spell-correct-word">' + esc(w.ru) + '</span>';
   } else {
-    stressGame.wrong.push(w);
+    stressGame.wrong.push({ ...w, src: 'stress' });
     fb.className = 'spell-feedback no';
     fb.innerHTML = '✗ 重音在第 ' + CN_ORD[right - 1] + ' 音节:<span class="spell-correct-word">' + esc(w.ru) + '</span>(' + esc(w.zh) + ')';
   }
@@ -845,13 +862,16 @@ function finishStress() {
   stressGame.wrong.forEach((w) => noteWrong(w)); // 错词进入错词本
   const total = stressGame.words.length, score = stressGame.score;
   $('#stress-result-score').textContent = score;
+  $('#stress-result-total').textContent = '/ ' + total;
+  const stressRing = $('#stress-ring-fill');
+  if (stressRing) { const c = 2 * Math.PI * 50; stressRing.style.transition = 'none'; stressRing.setAttribute('stroke-dasharray', c); stressRing.setAttribute('stroke-dashoffset', c); requestAnimationFrame(() => { requestAnimationFrame(() => { stressRing.style.transition = 'stroke-dashoffset 1s cubic-bezier(.4,0,.2,1)'; stressRing.setAttribute('stroke-dashoffset', c * (1 - score / total)); }); }); }
   $('#stress-result-msg').textContent = score === total ? '满分!重音大师! 🎉'
     : score >= total * 0.8 ? '非常棒!重音感觉越来越准了! 💪'
     : score >= total * 0.6 ? '不错!错的重音多听几遍!'
     : '别灰心,多听发音慢慢就有语感了!';
   $('#stress-wrong').innerHTML = stressGame.wrong.length
     ? stressGame.wrong.map((w, i) =>
-        '<div class="wrong-item fade-item" style="animation-delay:' + (i * 50) + 'ms"><button class="speak-btn small" data-speak="' + esc(w.ru) + '">🔊</button><span class="wrong-ru">' + esc(w.ru) + '</span><span class="wrong-zh">' + esc(w.zh) + '</span></div>').join('')
+        '<div class="wrong-item fade-item" style="animation-delay:' + (i * 50) + 'ms"><button class="speak-btn small" data-speak="' + esc(w.ru) + '">🔊</button><span class="wrong-ru">' + esc(w.ru) + '</span><span class="wrong-zh">' + esc(w.zh) + '</span><span class="wrong-source stress-src">重音</span></div>').join('')
     : '<p class="no-wrong">全部选对,没有错的重音! 👏</p>';
 }
 on('#stress-begin', 'click', startStress);
@@ -916,6 +936,15 @@ function renderDueView() {
   if (shuffleBtn) { shuffleBtn.classList.toggle('active', reviewShuffle); }
   $('#review-card').classList.remove('flipped');
   reviewWord = dueQueue[reviewIdx] || null;
+  // 艾宾浩斯阶段指示器
+  const dotsEl = $('#review-phase-dots');
+  if (dotsEl) {
+    const r = reviewWord ? reviewStateOf(reviewWord) : null;
+    const stage = r ? r.stage : 0;
+    dotsEl.innerHTML = INTERVALS.map((_, i) =>
+      '<span class="phase-dot' + (i < stage ? ' done' : '') + (i === stage ? ' current' : '') + '"></span>'
+    ).join('');
+  }
   if (reviewWord) {
     const r = reviewStateOf(reviewWord);
     const ruDisplay = stressVisible ? reviewWord.ru : norm(reviewWord.ru);
@@ -1909,12 +1938,15 @@ function finishWrongDrill() {
   $('#wrongdrill-result').hidden = false;
   const total = wrongDrill.words.length, score = wrongDrill.score;
   $('#wrongdrill-result-score').textContent = score;
+  $('#wrongdrill-result-total').textContent = '/ ' + total;
+  const wdr = $('#wrongdrill-ring-fill');
+  if (wdr) { const c = 2 * Math.PI * 50; wdr.style.transition = 'none'; wdr.setAttribute('stroke-dasharray', c); wdr.setAttribute('stroke-dashoffset', c); requestAnimationFrame(() => { requestAnimationFrame(() => { wdr.style.transition = 'stroke-dashoffset 1s cubic-bezier(.4,0,.2,1)'; wdr.setAttribute('stroke-dashoffset', c * (1 - score / total)); }); }); }
   const pct = Math.round(score / total * 100);
   $('#wrongdrill-result-msg').textContent = pct >= 90 ? '太棒了!错词基本攻克!' : pct >= 70 ? '不错,继续加油!' : '还需要多练';
   const box = $('#wrongdrill-wrong');
   box.innerHTML = wrongDrill.wrong.length
     ? wrongDrill.wrong.map((w, i) =>
-        '<div class="wrong-item fade-item" style="animation-delay:' + (i * 50) + 'ms"><span class="wrong-ru">' + esc(w.ru) + '</span><span class="wrong-zh">' + esc(w.zh) + '</span></div>').join('')
+        '<div class="wrong-item fade-item" style="animation-delay:' + (i * 50) + 'ms"><span class="wrong-ru">' + esc(w.ru) + '</span><span class="wrong-zh">' + esc(w.zh) + '</span><span class="wrong-source quiz-src">错词专项</span></div>').join('')
     : '<p class="no-wrong">全部答对!</p>';
   // 记录到周报
   const qd = dstr(new Date());

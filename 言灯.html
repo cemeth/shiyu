@@ -473,18 +473,37 @@ body.dark .btn-outline:hover:not(:disabled) { background: rgba(160,144,120,.12);
   border: 1px solid var(--border); border-radius: var(--radius);
   padding: 20px 22px; cursor: pointer; font-family: inherit; color: var(--text);
   background: var(--card); transition: all .25s cubic-bezier(.4,0,.2,1);
+  position: relative; overflow: hidden;
 }
+.pack-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: var(--pack-color, var(--primary)); opacity: .7; transition: opacity .2s;
+}
+.pack-card:hover::before { opacity: 1; }
+.pack-card[data-pack="base"]       { --pack-color: #1a56db; }
+.pack-card[data-pack="scenes"]     { --pack-color: #0891b2; }
+.pack-card[data-pack="freq"]       { --pack-color: #d97706; }
+.pack-card[data-pack="mistakes"]   { --pack-color: #dc2626; }
+.pack-card[data-pack="newscenes_ru"],
+.pack-card[data-pack="newscenes_en"] { --pack-color: #7c3aed; }
+.pack-card[data-pack="daily_ru"],
+.pack-card[data-pack="daily_en"]   { --pack-color: #15803d; }
 .pack-card:hover { border-color: var(--border-active); box-shadow: var(--shadow-lg); transform: translateY(-3px); }
-.pack-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pack-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-left: 10px; }
 .pack-card-name { font-size: 15px; font-weight: 600; color: var(--text); }
 .pack-card-count {
   font-size: 11px; background: var(--primary-bg); color: var(--primary);
   padding: 2px 10px; border-radius: 999px; font-family: var(--font-mono); font-weight: 500;
 }
 .pack-card-desc { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin: 0; }
-.pack-card-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
-.pack-card-bar i { display: block; height: 100%; border-radius: 2px; background: var(--primary); transition: width .6s ease; }
-.pack-card-meta { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+.pack-card-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.pack-card-bar i {
+  display: block; height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, var(--pack-color, var(--primary)), color-mix(in srgb, var(--pack-color, var(--primary)) 70%, #fff));
+  transition: width .6s ease;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.25);
+}
+.pack-card-meta { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); margin-left: 10px; }
 #vocab-area { animation: panelIn .35s ease; }
 #vocab-area.area-fade { animation: areaIn .35s cubic-bezier(.4,0,.2,1) both; }
 @keyframes areaIn { from { opacity: 0; transform: translateY(14px); } }
@@ -567,14 +586,15 @@ body.dark .btn-outline:hover:not(:disabled) { background: rgba(160,144,120,.12);
 .search-cat { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); }
 
 /* ========== 艾宾浩斯阶段指示器 ========== */
-.phase-dots { display: flex; gap: 5px; justify-content: center; margin-bottom: 8px; }
+.phase-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 10px; }
 .phase-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--border); border: 1.5px solid var(--border);
-  transition: all .2s;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--border-subtle); border: 1.5px solid var(--border);
+  transition: all .25s ease;
 }
-.phase-dot.done { background: var(--green); border-color: var(--green); }
-.phase-dot.current { background: var(--primary); border-color: var(--primary); }
+.phase-dot.done { background: var(--green); border-color: var(--green); box-shadow: 0 0 0 2px color-mix(in srgb, var(--green) 15%, transparent); }
+.phase-dot.current { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 20%, transparent); animation: dotPulse 1.5s ease-in-out infinite; }
+@keyframes dotPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.2); } }
 
 /* ========== 今日精选徽章 ========== */
 .today-badge {
@@ -645,14 +665,25 @@ body.dark .btn-outline:hover:not(:disabled) { background: rgba(160,144,120,.12);
   box-shadow: var(--shadow-md);
 }
 .score-ring {
-  width: 108px; height: 108px; border-radius: 50%; margin: 0 auto 10px;
-  border: 2px solid var(--border); color: var(--text);
-  display: flex; align-items: center; justify-content: center; flex-direction: column;
-  font-size: 2rem; font-weight: 700;
+  width: 116px; height: 116px; margin: 0 auto 10px;
+  position: relative;
   animation: scoreReveal .5s cubic-bezier(.22,.9,.36,1) both;
 }
-@keyframes scoreReveal { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.score-ring small { font-size: 12px; font-weight: 400; color: var(--text-muted); font-family: var(--font-mono); }
+.score-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.score-ring circle { fill: none; stroke-width: 5; }
+.score-ring .ring-bg { stroke: var(--border); }
+.score-ring .ring-fill {
+  stroke: var(--primary);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s cubic-bezier(.4,0,.2,1);
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--primary) 40%, transparent));
+}
+.score-ring .ring-text {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column;
+  transform: none;
+}
+.score-ring .ring-score { font-size: 2rem; font-weight: 700; color: var(--text); line-height: 1; }
+.score-ring .ring-total { font-size: 12px; font-weight: 400; color: var(--text-muted); font-family: var(--font-mono); margin-top: 2px; }
 .result-msg { color: var(--text-muted); margin-bottom: 8px; font-size: 13px; }
 #quiz-again { display: block; margin: 10px auto 0; }
 .wrong-list { margin: 12px 0 22px; display: flex; flex-direction: column; gap: 8px; }
@@ -662,6 +693,10 @@ body.dark .btn-outline:hover:not(:disabled) { background: rgba(160,144,120,.12);
 }
 .wrong-ru { font-weight: 700; font-size: 17px; color: var(--text); font-family: 'Noto Serif SC', 'Source Han Serif CN', Georgia, serif; letter-spacing: .4px; }
 .wrong-zh { color: var(--text-secondary); flex: 1; font-weight: 400; }
+.wrong-source { font-size: 10px; font-family: var(--font-mono); padding: 2px 7px; border-radius: 999px; white-space: nowrap; flex-shrink: 0; font-weight: 500; }
+.wrong-source.quiz-src  { background: rgba(26,86,219,.1); color: var(--primary); }
+.wrong-source.spell-src { background: rgba(217,119,6,.1); color: #b45309; }
+.wrong-source.stress-src { background: rgba(185,28,28,.08); color: var(--accent); }
 .no-wrong { text-align: center; color: var(--text-muted); padding: 10px 0; font-family: var(--font-mono); }
 
 /* ========== 拼写 ========== */
@@ -982,12 +1017,18 @@ body.dark .btn-outline:hover:not(:disabled) { background: rgba(160,144,120,.12);
   border-color: var(--accent); border-width: 1.5px;
   font-weight: 600; color: var(--text);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
+  animation: todayPulse 2.5s ease-in-out infinite;
+}
+@keyframes todayPulse {
+  0%, 100% { box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent); }
+  50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 8%, transparent); }
 }
 .cal-cell.future { opacity: .25; }
 .cal-cell.checked {
-  background: linear-gradient(135deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 80%, var(--accent)) 100%);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 85%, #fff) 0%, var(--primary) 50%, color-mix(in srgb, var(--primary) 75%, var(--accent)) 100%);
   border-color: transparent; color: #fff; font-weight: 600;
   animation: calPop .25s cubic-bezier(.22,.9,.36,1) both;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--primary) 25%, transparent);
 }
 .cal-cell.checked:hover { transform: scale(1.1); }
 @keyframes calPop { from { transform: scale(.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -1002,7 +1043,8 @@ body.dark .btn-outline:hover:not(:disabled) { background: rgba(160,144,120,.12);
   transition: all .15s ease; font-family: inherit; font-weight: 400;
 }
 .review-tab:hover { border-color: var(--border-active); color: var(--text); }
-.review-tab.active { background: var(--text); border-color: var(--text); color: var(--bg); }
+.review-tab.active { background: var(--text); border-color: var(--text); color: var(--bg); box-shadow: inset 0 1px 3px rgba(0,0,0,.12); }
+body.dark .review-tab.active { box-shadow: inset 0 1px 3px rgba(0,0,0,.3); }
 .review-tab:active { transform: scale(.97); }
 
 /* 生词本 / 错词本 */
@@ -1094,10 +1136,10 @@ body.dark .btn-outline:hover:not(:disabled) { background: rgba(160,144,120,.12);
 /* ========== 滚动条 ========== */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(0,0,0,.1); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,.18); }
-body.dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); }
-body.dark ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.14); }
+::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--text) 12%, transparent); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--text) 22%, transparent); }
+body.dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); }
+body.dark ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.18); }
 
 /* ========== 成就徽章 ========== */
 .badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
@@ -1366,7 +1408,7 @@ body[data-layout='editorial'] .today-badge {
 }
 body[data-layout='editorial'] .daily-word { border-radius: 0; border-left: 1px solid var(--border); }
 body[data-layout='editorial'] .btn { border-radius: 0; }
-body[data-layout='editorial'] .pack-card { border-radius: 0; border-left: 3px solid var(--primary); }
+body[data-layout='editorial'] .pack-card { border-radius: 0; border-left-width: 4px; }
 body[data-layout='editorial'] .container { padding-top: 56px; }
 
 /* ── 紧凑风(B): 高信息密度、卡片网格、工具感 ── */
@@ -1966,7 +2008,14 @@ body.dark .splash { background: linear-gradient(180deg, #14171d, #1b1f26); }
     </div>
     <div id="quiz-result" hidden>
       <div class="result-box">
-        <div class="score-ring"><span id="result-score">0</span><small>/ 10</small></div>
+        <div class="score-ring">
+          <svg viewBox="0 0 116 116">
+            <circle class="ring-bg" cx="58" cy="58" r="50"/>
+            <circle class="ring-fill" id="result-ring-fill" cx="58" cy="58" r="50"
+              stroke-dasharray="314" stroke-dashoffset="314"/>
+          </svg>
+          <div class="ring-text"><span class="ring-score" id="result-score">0</span><span class="ring-total" id="result-total">/ 10</span></div>
+        </div>
         <p class="result-msg" id="result-msg"></p>
       </div>
       <h3>错题回顾</h3>
@@ -2013,7 +2062,10 @@ body.dark .splash { background: linear-gradient(180deg, #14171d, #1b1f26); }
     </div>
     <div id="spell-result" hidden>
       <div class="result-box">
-        <div class="score-ring"><span id="spell-result-score">0</span><small>/ 10</small></div>
+        <div class="score-ring">
+          <svg viewBox="0 0 116 116"><circle class="ring-bg" cx="58" cy="58" r="50"/><circle class="ring-fill" id="spell-ring-fill" cx="58" cy="58" r="50" stroke-dasharray="314" stroke-dashoffset="314"/></svg>
+          <div class="ring-text"><span class="ring-score" id="spell-result-score">0</span><span class="ring-total" id="spell-result-total">/ 10</span></div>
+        </div>
         <p class="result-msg" id="spell-result-msg"></p>
       </div>
       <h3>拼错回顾</h3>
@@ -2043,6 +2095,7 @@ body.dark .splash { background: linear-gradient(180deg, #14171d, #1b1f26); }
         <p>🎉 今天没有到期的复习任务!新学的单词明天就会按计划出现在这里。</p>
       </div>
       <div id="review-run">
+        <div id="review-phase-dots" class="phase-dots"></div>
         <div class="flashcard" id="review-card">
           <div class="flashcard-inner">
             <div class="flashcard-face flashcard-front">
@@ -2112,7 +2165,10 @@ body.dark .splash { background: linear-gradient(180deg, #14171d, #1b1f26); }
     </div>
     <div id="wrongdrill-result" hidden>
       <div class="result-box">
-        <div class="score-ring"><span id="wrongdrill-result-score">0</span><small>/ ?</small></div>
+        <div class="score-ring">
+          <svg viewBox="0 0 116 116"><circle class="ring-bg" cx="58" cy="58" r="50"/><circle class="ring-fill" id="wrongdrill-ring-fill" cx="58" cy="58" r="50" stroke-dasharray="314" stroke-dashoffset="314"/></svg>
+          <div class="ring-text"><span class="ring-score" id="wrongdrill-result-score">0</span><span class="ring-total" id="wrongdrill-result-total">/?</span></div>
+        </div>
         <p class="result-msg" id="wrongdrill-result-msg"></p>
       </div>
       <h3>错误回顾</h3>
@@ -2164,7 +2220,10 @@ body.dark .splash { background: linear-gradient(180deg, #14171d, #1b1f26); }
       </div>
       <div id="stress-result" hidden>
         <div class="result-box">
-          <div class="score-ring"><span id="stress-result-score">0</span><small>/ 10</small></div>
+          <div class="score-ring">
+            <svg viewBox="0 0 116 116"><circle class="ring-bg" cx="58" cy="58" r="50"/><circle class="ring-fill" id="stress-ring-fill" cx="58" cy="58" r="50" stroke-dasharray="314" stroke-dashoffset="314"/></svg>
+            <div class="ring-text"><span class="ring-score" id="stress-result-score">0</span><span class="ring-total" id="stress-result-total">/ 10</span></div>
+          </div>
           <p class="result-msg" id="stress-result-msg"></p>
         </div>
         <div class="wrong-list" id="stress-wrong"></div>
@@ -13227,7 +13286,7 @@ function startQuiz() {
   const pool = learnedPool(); // 只从学习过的单词中出题
   if (pool.length < 4) { toast('学习过的单词太少,先把单词标记为「认识」再来测验吧'); return; }
   shuffle(pool);
-  quiz = { words: pool.slice(0, 10), idx: 0, score: 0, wrong: [], opts: [] };
+  quiz = { words: pool.slice(0, 10), idx: 0, score: 0, wrong: [], opts: [], type: 'quiz' };
   $('#quiz-start').hidden = true;
   $('#quiz-result').hidden = true;
   $('#quiz-run').hidden = false;
@@ -13263,7 +13322,7 @@ function answerQuiz(chosen) {
     if (quiz.opts[i] === w) b.classList.add('correct');
     else if (quiz.opts[i] === chosen) b.classList.add('wrong');
   });
-  if (correct) quiz.score++; else quiz.wrong.push(w);
+  if (correct) quiz.score++; else quiz.wrong.push({ ...w, src: 'quiz' });
   $('#quiz-score').textContent = '得分:' + quiz.score;
   $('#quiz-next').hidden = false;
 }
@@ -13273,6 +13332,20 @@ function finishQuiz() {
   $('#quiz-result').hidden = false;
   const total = quiz.words.length, score = quiz.score;
   $('#result-score').textContent = score;
+  $('#result-total').textContent = '/ ' + total;
+  const ring = $('#result-ring-fill');
+  if (ring) {
+    const circ = 2 * Math.PI * 50;
+    ring.style.transition = 'none';
+    ring.setAttribute('stroke-dasharray', circ);
+    ring.setAttribute('stroke-dashoffset', circ);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        ring.style.transition = 'stroke-dashoffset 1s cubic-bezier(.4,0,.2,1)';
+        ring.setAttribute('stroke-dashoffset', circ * (1 - score / total));
+      });
+    });
+  }
   $('#result-msg').textContent = score === total ? '满分!太棒了! 🎉'
     : score >= total * 0.8 ? '非常棒!继续保持! 💪'
     : score >= total * 0.6 ? '不错!再复习一下错题吧!'
@@ -13286,7 +13359,7 @@ function finishQuiz() {
   const box = $('#quiz-wrong');
   box.innerHTML = quiz.wrong.length
     ? quiz.wrong.map((w, i) =>
-        '<div class="wrong-item fade-item" style="animation-delay:' + (i * 50) + 'ms"><button class="speak-btn small" data-speak="' + esc(w.ru) + '">🔊</button><span class="wrong-ru">' + esc(w.ru) + '</span><span class="wrong-zh">' + esc(w.zh) + '</span></div>').join('')
+        '<div class="wrong-item fade-item" style="animation-delay:' + (i * 50) + 'ms"><button class="speak-btn small" data-speak="' + esc(w.ru) + '">🔊</button><span class="wrong-ru">' + esc(w.ru) + '</span><span class="wrong-zh">' + esc(w.zh) + '</span><span class="wrong-source quiz-src">测验</span></div>').join('')
     : '<p class="no-wrong">全部答对,没有错题! 👏</p>';
   updateHero();
   checkAchievements(); // 成就:测验最高分
@@ -13324,7 +13397,7 @@ function startSpell() {
   const pool = learnedPool(); // 只从学习过的单词中出题
   if (pool.length < 3) { toast('学习过的单词太少,先把单词标记为「认识」吧'); return; }
   shuffle(pool);
-  spell = { words: pool.slice(0, 10), idx: 0, score: 0, wrong: [] };
+  spell = { words: pool.slice(0, 10), idx: 0, score: 0, wrong: [], type: 'spell' };
   $('#spell-start').hidden = true;
   $('#spell-result').hidden = true;
   $('#spell-run').hidden = false;
@@ -13376,7 +13449,7 @@ function submitSpell() {
     fb.className = 'spell-feedback ok';
     fb.innerHTML = '✓ 正确! <span class="spell-correct-word">' + esc(w.ru) + '</span>';
   } else {
-    spell.wrong.push(w);
+    spell.wrong.push({ ...w, src: 'spell' });
     fb.className = 'spell-feedback no';
     fb.innerHTML = '✗ 正确答案:<span class="spell-correct-word">' + esc(w.ru) + '</span>(' + esc(w.zh) + ')';
   }
@@ -13397,6 +13470,9 @@ function finishSpell() {
   spell.wrong.forEach((w) => noteWrong(w)); // 拼错的词进入错词本
   const total = spell.words.length, score = spell.score;
   $('#spell-result-score').textContent = score;
+  $('#spell-result-total').textContent = '/ ' + total;
+  const spellRing = $('#spell-ring-fill');
+  if (spellRing) { const c = 2 * Math.PI * 50; spellRing.style.transition = 'none'; spellRing.setAttribute('stroke-dasharray', c); spellRing.setAttribute('stroke-dashoffset', c); requestAnimationFrame(() => { requestAnimationFrame(() => { spellRing.style.transition = 'stroke-dashoffset 1s cubic-bezier(.4,0,.2,1)'; spellRing.setAttribute('stroke-dashoffset', c * (1 - score / total)); }); }); }
   $('#spell-result-msg').textContent = score === total ? '满分!拼写大师! 🎉'
     : score >= total * 0.8 ? '非常棒!继续保持! 💪'
     : score >= total * 0.6 ? '不错!错词再抄写几遍吧!'
@@ -13411,7 +13487,7 @@ function finishSpell() {
   const box = $('#spell-wrong');
   box.innerHTML = spell.wrong.length
     ? spell.wrong.map((w, i) =>
-        '<div class="wrong-item fade-item" style="animation-delay:' + (i * 50) + 'ms"><button class="speak-btn small" data-speak="' + esc(w.ru) + '">🔊</button><span class="wrong-ru">' + esc(w.ru) + '</span><span class="wrong-zh">' + esc(w.zh) + '</span></div>').join('')
+        '<div class="wrong-item fade-item" style="animation-delay:' + (i * 50) + 'ms"><button class="speak-btn small" data-speak="' + esc(w.ru) + '">🔊</button><span class="wrong-ru">' + esc(w.ru) + '</span><span class="wrong-zh">' + esc(w.zh) + '</span><span class="wrong-source spell-src">拼写</span></div>').join('')
     : '<p class="no-wrong">全部拼对,没有错词! 👏</p>';
 }
 
@@ -13445,7 +13521,7 @@ function startStress() {
   const pool = learnedPool().filter((w) => stressSyllable(w.ru) > 0);
   if (pool.length < 3) { toast('学习过的带重音单词太少,先把单词标记为「认识」吧'); return; }
   shuffle(pool);
-  stressGame = { words: pool.slice(0, 10), idx: 0, score: 0, wrong: [] };
+  stressGame = { words: pool.slice(0, 10), idx: 0, score: 0, wrong: [], type: 'stress' };
   $('#stress-start').hidden = true;
   $('#stress-result').hidden = true;
   $('#stress-run').hidden = false;
@@ -13484,7 +13560,7 @@ function answerStress(n) {
     fb.className = 'spell-feedback ok';
     fb.innerHTML = '✓ 正确! <span class="spell-correct-word">' + esc(w.ru) + '</span>';
   } else {
-    stressGame.wrong.push(w);
+    stressGame.wrong.push({ ...w, src: 'stress' });
     fb.className = 'spell-feedback no';
     fb.innerHTML = '✗ 重音在第 ' + CN_ORD[right - 1] + ' 音节:<span class="spell-correct-word">' + esc(w.ru) + '</span>(' + esc(w.zh) + ')';
   }
@@ -13501,13 +13577,16 @@ function finishStress() {
   stressGame.wrong.forEach((w) => noteWrong(w)); // 错词进入错词本
   const total = stressGame.words.length, score = stressGame.score;
   $('#stress-result-score').textContent = score;
+  $('#stress-result-total').textContent = '/ ' + total;
+  const stressRing = $('#stress-ring-fill');
+  if (stressRing) { const c = 2 * Math.PI * 50; stressRing.style.transition = 'none'; stressRing.setAttribute('stroke-dasharray', c); stressRing.setAttribute('stroke-dashoffset', c); requestAnimationFrame(() => { requestAnimationFrame(() => { stressRing.style.transition = 'stroke-dashoffset 1s cubic-bezier(.4,0,.2,1)'; stressRing.setAttribute('stroke-dashoffset', c * (1 - score / total)); }); }); }
   $('#stress-result-msg').textContent = score === total ? '满分!重音大师! 🎉'
     : score >= total * 0.8 ? '非常棒!重音感觉越来越准了! 💪'
     : score >= total * 0.6 ? '不错!错的重音多听几遍!'
     : '别灰心,多听发音慢慢就有语感了!';
   $('#stress-wrong').innerHTML = stressGame.wrong.length
     ? stressGame.wrong.map((w, i) =>
-        '<div class="wrong-item fade-item" style="animation-delay:' + (i * 50) + 'ms"><button class="speak-btn small" data-speak="' + esc(w.ru) + '">🔊</button><span class="wrong-ru">' + esc(w.ru) + '</span><span class="wrong-zh">' + esc(w.zh) + '</span></div>').join('')
+        '<div class="wrong-item fade-item" style="animation-delay:' + (i * 50) + 'ms"><button class="speak-btn small" data-speak="' + esc(w.ru) + '">🔊</button><span class="wrong-ru">' + esc(w.ru) + '</span><span class="wrong-zh">' + esc(w.zh) + '</span><span class="wrong-source stress-src">重音</span></div>').join('')
     : '<p class="no-wrong">全部选对,没有错的重音! 👏</p>';
 }
 on('#stress-begin', 'click', startStress);
@@ -13572,6 +13651,15 @@ function renderDueView() {
   if (shuffleBtn) { shuffleBtn.classList.toggle('active', reviewShuffle); }
   $('#review-card').classList.remove('flipped');
   reviewWord = dueQueue[reviewIdx] || null;
+  // 艾宾浩斯阶段指示器
+  const dotsEl = $('#review-phase-dots');
+  if (dotsEl) {
+    const r = reviewWord ? reviewStateOf(reviewWord) : null;
+    const stage = r ? r.stage : 0;
+    dotsEl.innerHTML = INTERVALS.map((_, i) =>
+      '<span class="phase-dot' + (i < stage ? ' done' : '') + (i === stage ? ' current' : '') + '"></span>'
+    ).join('');
+  }
   if (reviewWord) {
     const r = reviewStateOf(reviewWord);
     const ruDisplay = stressVisible ? reviewWord.ru : norm(reviewWord.ru);
@@ -14566,12 +14654,15 @@ function finishWrongDrill() {
   $('#wrongdrill-result').hidden = false;
   const total = wrongDrill.words.length, score = wrongDrill.score;
   $('#wrongdrill-result-score').textContent = score;
+  $('#wrongdrill-result-total').textContent = '/ ' + total;
+  const wdr = $('#wrongdrill-ring-fill');
+  if (wdr) { const c = 2 * Math.PI * 50; wdr.style.transition = 'none'; wdr.setAttribute('stroke-dasharray', c); wdr.setAttribute('stroke-dashoffset', c); requestAnimationFrame(() => { requestAnimationFrame(() => { wdr.style.transition = 'stroke-dashoffset 1s cubic-bezier(.4,0,.2,1)'; wdr.setAttribute('stroke-dashoffset', c * (1 - score / total)); }); }); }
   const pct = Math.round(score / total * 100);
   $('#wrongdrill-result-msg').textContent = pct >= 90 ? '太棒了!错词基本攻克!' : pct >= 70 ? '不错,继续加油!' : '还需要多练';
   const box = $('#wrongdrill-wrong');
   box.innerHTML = wrongDrill.wrong.length
     ? wrongDrill.wrong.map((w, i) =>
-        '<div class="wrong-item fade-item" style="animation-delay:' + (i * 50) + 'ms"><span class="wrong-ru">' + esc(w.ru) + '</span><span class="wrong-zh">' + esc(w.zh) + '</span></div>').join('')
+        '<div class="wrong-item fade-item" style="animation-delay:' + (i * 50) + 'ms"><span class="wrong-ru">' + esc(w.ru) + '</span><span class="wrong-zh">' + esc(w.zh) + '</span><span class="wrong-source quiz-src">错词专项</span></div>').join('')
     : '<p class="no-wrong">全部答对!</p>';
   // 记录到周报
   const qd = dstr(new Date());
